@@ -76,13 +76,15 @@ Theo yêu cầu, các tính năng nâng cao (auto-sync roadmap, reputation, job 
 
 ## 5. Tech Stack đề xuất
 
-Đề xuất ban đầu: **React + Node + Firebase/Supabase**. Hướng đó đúng, chỉ cần chốt cụ thể hai điểm: framework React nào, và Firebase hay Supabase.
+Đề xuất ban đầu: **React + Node + Firebase/Supabase**. Bản v0.1 của PRD này từng đề xuất gộp React và Node lại thành một app Next.js duy nhất để tối ưu SEO. Theo yêu cầu thực tế, quyết định đã đổi lại: **tách riêng backend Node.js và frontend React**, đúng như đề xuất ban đầu.
 
-> **Quyết định:** Dùng **Next.js** (không phải React thuần/CRA/Vite) và **Supabase** (không phải Firebase). Không cần dựng server Node riêng cho MVP — Next.js API Route Handlers đảm nhiệm phần "Node backend".
+> **Quyết định (cập nhật):** Dùng **React (Vite) + Node.js (Express)** làm hai service riêng biệt, và **Supabase** (không phải Firebase) cho Postgres/Auth/Storage.
 
-### Vì sao Next.js thay vì React SPA thuần
+### Vì sao tách riêng Node.js và React thay vì gộp vào Next.js
 
-DevNest là nền tảng nội dung (blog, project) — cần được Google index tốt. React thuần (Vite/CRA) render phía client, SEO yếu. Next.js hỗ trợ SSR/SSG sẵn, mỗi bài blog/project có một URL render sẵn nội dung — quan trọng để nội dung được tìm thấy qua tìm kiếm, không chỉ qua feed nội bộ.
+Ưu điểm của việc tách riêng: hai codebase độc lập, dễ scale/deploy riêng (frontend lên static hosting, backend lên bất kỳ server Node nào), và kiến trúc quen thuộc hơn với đội ngũ quen Express/REST. Đánh đổi: mất SSR có sẵn của Next.js nên SEO cho trang blog/project sẽ yếu hơn ở giai đoạn đầu (React thuần render phía client) — nếu SEO trở thành ưu tiên, có thể thêm SSR sau (Vite SSR hoặc một app Next.js riêng chỉ cho các trang công khai) mà không cần đổi lại toàn bộ kiến trúc.
+
+Trong kiến trúc mới, phần lớn CRUD (đăng bài, like, comment, follow...) gọi thẳng từ React sang Supabase (được bảo vệ bằng Row Level Security), không qua Node. Node/Express chỉ đứng ra làm phần việc cần giữ bí mật hoặc logic riêng — cụ thể ở MVP là gọi GitHub API bằng `GITHUB_TOKEN` (không thể lộ token này ra browser).
 
 ### Vì sao Supabase thay vì Firebase
 
@@ -100,29 +102,24 @@ Dữ liệu của DevNest mang tính quan hệ rõ: user — post — project �
 ### Kiến trúc tổng thể
 
 ```
-Client
-  Next.js 14+ (App Router) · TypeScript · Tailwind CSS
-  react-markdown / MDX + shiki cho code block trong blog & README preview
+Client (client/)
+  React 19 (Vite) · TypeScript · Tailwind CSS · React Router
+  Gọi Supabase trực tiếp (auth, CRUD qua RLS) + gọi API Node cho phần cần token bí mật
         │
-        ▼
-Backend logic
-  Next.js Route Handlers (thay cho server Node riêng)
-  Gọi GitHub API qua Octokit để lấy metadata repo (stars, ngôn ngữ, README)
-        │
-        ▼
-Data / Auth / Storage
-  Supabase — Postgres (dữ liệu quan hệ) · Auth với GitHub OAuth · Storage cho ảnh
-        │
-        ▼
-Bên ngoài
-  GitHub REST API — nguồn metadata repo, cần cache để tránh chạm rate limit
+        ├──────────────────────────────┐
+        ▼                               ▼
+Backend (server/)                Data / Auth / Storage
+  Node.js + Express · TypeScript   Supabase — Postgres · Auth (GitHub OAuth) · Storage
+  Gọi GitHub API qua Octokit             │
+  để lấy metadata repo                   ▼
+        │                         Bên ngoài
+        ▼                         GitHub REST API — nguồn metadata repo,
+  (giữ GITHUB_TOKEN phía server)   cần cache để tránh chạm rate limit
 ```
 
 ### Danh sách công nghệ cụ thể
 
-`Next.js 14` · `TypeScript` · `Tailwind CSS` · `Supabase (Postgres)` · `Supabase Auth · GitHub OAuth` · `Supabase Storage` · `Octokit` · `react-markdown + shiki` · `Postgres tsvector search` · `Vercel hosting`
-
-Khi nào mới cần một server Node riêng: nếu về sau có cron job nặng, hàng đợi xử lý, hoặc webhook liên tục từ GitHub — lúc đó thêm một service Node nhỏ (Railway/Fly.io) chạy song song, không phải viết lại kiến trúc chính.
+`React 19` · `Vite` · `TypeScript` · `Tailwind CSS` · `React Router` · `Node.js` · `Express` · `Supabase (Postgres)` · `Supabase Auth · GitHub OAuth` · `Supabase Storage` · `Octokit` · `react-markdown + remark-gfm` · `Postgres tsvector search`
 
 ## 6. Giả định & Rủi ro
 
