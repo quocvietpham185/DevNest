@@ -1,13 +1,15 @@
 # DevNest — Product Requirements Document
 
-> Nền tảng cộng đồng dành cho developer — nơi đăng blog kỹ thuật, giới thiệu dự án đang xây, chia sẻ repository đáng chú ý và xây dựng một developer profile được liên kết trực tiếp với GitHub.
+> Nền tảng cộng đồng dành cho developer — nơi viết blog kỹ thuật, giới thiệu dự án đang xây, hỏi đáp/thảo luận, và chia sẻ repository đáng chú ý.
 
 | | |
 |---|---|
-| **Phiên bản** | 0.2 |
+| **Phiên bản** | 1.0 |
 | **Trạng thái** | Draft / MVP |
-| **Ngày** | 08/09/2026 |
+| **Ngày** | 15/09/2026 |
 | **Phạm vi** | MVP |
+
+> Đây là bản viết lại từ đầu, thay thế hoàn toàn v0.1 và v0.2. Thay đổi lớn nhất so với v0.2: **GitHub không còn là điều kiện bắt buộc** để dùng DevNest, và tích hợp GitHub được đơn giản hoá mạnh cho MVP — xem mục 5 và mục 12 để biết lý do.
 
 ---
 
@@ -17,41 +19,47 @@
 2. [Mục tiêu & Thước đo thành công](#2-mục-tiêu--thước-đo-thành-công)
 3. [Đối tượng người dùng](#3-đối-tượng-người-dùng)
 4. [Phạm vi MVP](#4-phạm-vi-mvp)
-5. [Tích hợp GitHub](#5-tích-hợp-github)
-6. [Tính năng đề xuất bổ sung](#6-tính-năng-đề-xuất-bổ-sung)
-7. [Tech Stack đề xuất](#7-tech-stack-đề-xuất)
-8. [Kiến trúc tổng thể](#8-kiến-trúc-tổng-thể)
-9. [Mô hình dữ liệu chính](#9-mô-hình-dữ-liệu-chính)
-10. [API chính của Backend](#10-api-chính-của-backend)
-11. [Yêu cầu phi chức năng](#11-yêu-cầu-phi-chức-năng)
-12. [Giả định & Rủi ro](#12-giả-định--rủi-ro)
+5. [Tích hợp GitHub (đã đơn giản hoá)](#5-tích-hợp-github-đã-đơn-giản-hoá)
+6. [Tech Stack](#6-tech-stack)
+7. [Kiến trúc tổng thể](#7-kiến-trúc-tổng-thể)
+8. [Mô hình dữ liệu](#8-mô-hình-dữ-liệu)
+9. [API chính của Backend](#9-api-chính-của-backend)
+10. [Yêu cầu phi chức năng](#10-yêu-cầu-phi-chức-năng)
+11. [Giả định & Rủi ro](#11-giả-định--rủi-ro)
+12. [Vì sao đơn giản hoá GitHub integration](#12-vì-sao-đơn-giản-hoá-github-integration)
 13. [Roadmap sau MVP](#13-roadmap-sau-mvp)
 
 ---
 
 # 1. Tổng quan & Tầm nhìn
 
-Hiện tại, một developer thường rải hoạt động của mình trên nhiều nơi: code trên GitHub, viết blog trên dev.to/Hashnode, share project trên mạng xã hội và tìm cộng đồng ở nhiều nền tảng khác nhau.
+Một developer thường rải hoạt động của mình trên nhiều nơi: code trên GitHub, viết blog trên dev.to/Hashnode, hỏi đáp trên Stack Overflow, share project trên mạng xã hội. **DevNest** gộp bốn hoạt động này vào một cộng đồng duy nhất:
 
-**DevNest** gộp ba loại nội dung — blog, project showcase và repository — vào một cộng đồng duy nhất, đồng thời tận dụng GitHub như nguồn dữ liệu kỹ thuật đáng tin cậy cho profile và repository.
+```text
+Blog          — viết & đọc bài kỹ thuật
+Project       — giới thiệu dự án đang xây, tìm feedback/cộng tác viên
+Q&A           — hỏi đáp, thảo luận kỹ thuật
+Repo          — chia sẻ repository đáng chú ý (không bắt buộc phải có GitHub)
+```
+
+**GitHub trong DevNest chỉ là một lựa chọn, không phải điều kiện bắt buộc**: user có thể đăng ký bằng email/password bình thường, và "chia sẻ repo" chỉ đơn giản là dán một đường link kèm ghi chú — không cần kết nối tài khoản GitHub. Đây là thay đổi có chủ đích so với bản nháp trước (xem mục 12) để cộng đồng không bị bó hẹp vào riêng hệ sinh thái GitHub.
 
 ### Vấn đề cần giải quyết
 
 Developer cần một nơi để:
-
 - xây dựng thương hiệu cá nhân thông qua bài viết;
 - giới thiệu project đang xây dựng và tìm feedback;
-- chia sẻ repository đáng chú ý;
-- có một profile kỹ thuật liên kết trực tiếp với tài khoản GitHub;
-- khám phá nội dung được tạo bởi đúng cộng đồng developer.
+- đặt câu hỏi kỹ thuật và giúp người khác trả lời;
+- chia sẻ repository/công cụ đáng chú ý;
+- khám phá nội dung được tạo bởi đúng cộng đồng developer, không lẫn với mạng xã hội chung.
 
 ### Sứ mệnh của MVP
 
 Chứng minh giả thuyết rằng:
 
-> **Blog + Project + Repository + GitHub Profile có thể cùng tồn tại trong một community feed và tạo thành một vòng lặp “đăng → khám phá → tương tác”.**
+> **Blog + Project + Q&A + Repo có thể cùng tồn tại trong một community feed và tạo thành một vòng lặp "đăng → khám phá → tương tác", mà không cần bắt buộc mọi hoạt động phải đi qua GitHub.**
 
-MVP ưu tiên validate sản phẩm, không ưu tiên scale lớn hoặc tự động hóa GitHub ở mức sâu.
+MVP ưu tiên validate sản phẩm với chi phí vận hành backend thấp — không đầu tư vào tích hợp GitHub sâu trước khi biết cộng đồng có thực sự cần nó hay không.
 
 ---
 
@@ -60,989 +68,325 @@ MVP ưu tiên validate sản phẩm, không ưu tiên scale lớn hoặc tự đ
 | Chỉ số | Mục tiêu MVP | Ghi chú |
 |---|---|---|
 | WAU (Weekly Active Users) | 150+ | trong 6 tuần đầu sau launch |
-| Bài đăng / tuần | 30+ | blog + project + repo |
+| Bài đăng / tuần | 30+ | blog + project + Q&A + repo cộng lại |
 | W2 Retention | ≥ 25% | user quay lại tuần thứ 2 |
 | Time-to-publish | < 3 phút | từ bắt đầu tạo bài đến publish |
 | Tỷ lệ bài có ít nhất 1 tương tác | ≥ 40% | like/comment/bookmark trong 48h |
+| Tỷ lệ câu hỏi Q&A có câu trả lời | ≥ 50% | trong 72h sau khi đăng |
 | Tỷ lệ lỗi API | < 1% | theo dõi qua backend logging |
-| Tỷ lệ import GitHub thành công | ≥ 95% | với public repository hợp lệ |
-| Tỷ lệ profile GitHub sync thành công | ≥ 95% | sau khi user đăng nhập/liên kết |
 
-Nếu sau 6 tuần W2 Retention dưới 10%, giả thuyết “3 loại nội dung sống chung” cần được xem lại trước khi build thêm tính năng nâng cao.
+Nếu sau 6 tuần W2 Retention dưới 10%, giả thuyết "4 loại nội dung sống chung" cần được xem lại trước khi build thêm tính năng nâng cao.
 
 ---
 
 # 3. Đối tượng người dùng
 
 ### 3.1 Dev đang xây side-project
-
 Muốn show tiến độ, tìm feedback sớm và thu hút cộng tác viên.
 
 ### 3.2 Dev viết blog kỹ thuật
+Muốn xây dựng thương hiệu cá nhân và chia sẻ kiến thức với đúng cộng đồng kỹ thuật. Đây là nhóm nội dung được ưu tiên nhất trong DevNest.
 
-Muốn xây dựng thương hiệu cá nhân và chia sẻ kiến thức với đúng cộng đồng kỹ thuật.
+### 3.3 Dev cần giúp đỡ / thích trả lời câu hỏi
+Muốn đặt câu hỏi kỹ thuật cụ thể, hoặc giúp người khác giải quyết vấn đề để xây uy tín trong cộng đồng.
 
-### 3.3 Dev đi khám phá
-
-Muốn tìm repository, project và bài viết chất lượng để học hỏi.
-
-### 3.4 Dev muốn xây dựng developer profile
-
-Muốn biến GitHub + project + blog thành một profile cá nhân tập trung thay vì chỉ có một đường link GitHub đơn lẻ.
+### 3.4 Dev đi khám phá
+Muốn tìm repository, project và bài viết chất lượng để học hỏi — không nhất thiết phải có tài khoản GitHub.
 
 ---
 
 # 4. Phạm vi MVP
 
-MVP tập trung vào vòng lặp cốt lõi:
+Vòng lặp cốt lõi:
 
 ```text
-Đăng nội dung
+Đăng nội dung (blog / project / Q&A / repo)
       ↓
-GitHub/Project information
+Được khám phá (feed, tag, search)
       ↓
-Được khám phá
+Được tương tác (like / comment / bookmark)
       ↓
-Like / Comment / Bookmark
-      ↓
-Follow user / tag
+Follow user / tag → quay lại feed
 ```
 
 ## 4.1 Trong phạm vi MVP
 
-- Đăng nhập qua GitHub OAuth.
-- Đồng bộ thông tin cơ bản từ GitHub vào Profile.
-- Profile cá nhân.
-- Đăng blog bằng Markdown.
-- Đăng Project Showcase.
-- Share GitHub Repository.
-- Tự động fetch metadata repository từ GitHub.
-- Tự động fetch README của repository.
-- Hiển thị repository card có thông tin GitHub.
-- Cho phép refresh metadata repository.
-- Feed: mới nhất / theo tag.
-- Like, comment, bookmark.
-- Follow user / follow tag.
-- Tìm kiếm bài viết, project, repository và user.
-- Hiển thị GitHub statistics cơ bản trên profile.
+**Auth & Profile**
+- Đăng ký / đăng nhập bằng **email + password** hoặc **GitHub OAuth** — cả hai đều là lựa chọn ngang hàng, không bắt buộc GitHub.
+- Nếu đăng nhập qua GitHub: lấy avatar + username làm giá trị mặc định ban đầu (không đồng bộ sâu thêm followers/company/location...).
+- Onboarding lần đầu: chọn 3–5 tag quan tâm để cá nhân hoá feed.
+- Trang profile công khai: thông tin cơ bản + danh sách Blog/Project/Q&A/Repo đã đăng.
+- Trang chỉnh sửa profile (bio, avatar, website, skills).
+- Đăng xuất.
+
+**Blog** (trọng tâm chính của cộng đồng)
+- Editor Markdown (soạn + xem trước song song), upload ảnh.
+- Gắn tag (tối đa 5), lưu draft / publish.
+- Trang đọc bài: syntax highlighting cho code block, ước tính thời gian đọc, SEO meta/OpenGraph động.
+- Sửa / xoá bài đã đăng.
+
+**Project Showcase**
+- Form tạo project: tên, mô tả, tech stack (tag), link repo/demo, ảnh cover.
+- Trạng thái: Đang phát triển / Hoàn thành / Tìm cộng tác viên.
+- Trang chi tiết, sửa/xoá.
+
+**Q&A / Thảo luận**
+- Đăng câu hỏi: title + nội dung Markdown + tag.
+- Trả lời câu hỏi (dạng comment gắn vào câu hỏi).
+- Người hỏi có thể đánh dấu 1 câu trả lời là **Best answer**.
+- Trạng thái câu hỏi: Chưa giải quyết / Đã giải quyết.
+- Sắp xếp danh sách câu hỏi: mới nhất / nhiều câu trả lời nhất.
+
+**Repo Share** (đơn giản — xem mục 5 và 12 để biết lý do)
+- Dán link GitHub repo, tự nhập title/mô tả/ghi chú cá nhân ("vì sao repo này hay").
+- Tuỳ chọn: fetch nhẹ một lần lúc submit (tên, mô tả, stars, ngôn ngữ chính) để gợi ý điền sẵn form — **không bắt buộc**, và nếu fetch lỗi/timeout thì vẫn cho đăng bằng thông tin tự nhập.
+- Không cache, không refresh định kỳ, không fetch README ở MVP.
+
+**Feed & Khám phá**
+- Feed mới nhất, lọc theo tag.
+- Phân biệt rõ 4 loại nội dung (blog/project/Q&A/repo) bằng nhãn/màu khác nhau trên card.
 - Pagination / infinite scroll.
-- Draft bài viết.
-- Report / flag nội dung.
+- Empty state & error state.
+
+**Tương tác xã hội**
+- Like, bình luận (phẳng, riêng Q&A có thêm "đánh dấu best answer"), bookmark.
+- Follow user, follow tag.
+
+**Tìm kiếm**
+- Full-text search (Postgres `tsvector`) trên cả 4 loại nội dung + username.
+- Trang kết quả có filter theo loại nội dung.
+
+**Vận hành**
+- Report/flag nội dung.
 - Sitemap.xml + metadata/OpenGraph động.
+- Logging request/error cơ bản.
 
 ## 4.2 Không nằm trong MVP
 
-- Download toàn bộ source code repository về hệ thống.
-- Chạy hoặc build source code của repository trên server DevNest.
-- Auto-sync roadmap/changelog nâng cao.
-- AI phân tích toàn bộ source code.
-- Reputation/badge system nâng cao.
-- Job board.
-- Public API.
-- Cross-post Twitter/LinkedIn.
-- Real-time notification nâng cao.
+- Auto-sync GitHub profile (followers, company, location, public repos...).
+- Cache + refresh định kỳ metadata repo, fetch/hiển thị README trong app, xử lý rate-limit GitHub nâng cao.
+- GitHub activity, pinned repositories, GitHub webhook.
+- Download/chạy source code repository trên server DevNest.
+- AI phân tích code/README, reputation & badge nâng cao, job board, public API, cross-post Twitter/LinkedIn, real-time notification nâng cao.
 
 ---
 
-# 5. Tích hợp GitHub
+# 5. Tích hợp GitHub (đã đơn giản hoá)
 
-GitHub là nguồn dữ liệu bên ngoài phục vụ hai nhóm chức năng chính:
+So với bản nháp trước, GitHub chỉ còn giữ **hai vai trò nhỏ** ở MVP:
 
 ```text
-GitHub
-├── Authentication / Identity
-│   └── GitHub OAuth
-│
-├── User Profile
-│   ├── username
-│   ├── name
-│   ├── avatar
-│   ├── bio
-│   ├── company
-│   ├── location
-│   ├── website
-│   ├── followers
-│   ├── following
-│   └── public repositories
-│
-└── Repository
-    ├── metadata
-    ├── statistics
-    ├── topics
-    ├── language
-    ├── license
-    └── README
+1. GitHub OAuth — một trong hai lựa chọn đăng nhập (song song email/password)
+2. Repo Share   — gợi ý điền sẵn form bằng một lần fetch nhẹ (tuỳ chọn, không bắt buộc)
 ```
 
-## 5.1 GitHub OAuth / Login
-
-Người dùng có thể đăng nhập bằng GitHub.
-
-### Flow
+### 5.1 GitHub OAuth (tuỳ chọn)
 
 ```text
 User
  ↓
-Click "Continue with GitHub"
+Chọn "Đăng nhập bằng email" HOẶC "Continue with GitHub"
  ↓
-GitHub Authorization
+Supabase Auth xử lý cả hai phương thức
  ↓
-GitHub redirect về DevNest
+Nếu GitHub: lấy avatar + username làm giá trị mặc định
  ↓
-Backend xác thực authorization
+Tạo profile DevNest (áp dụng chung cho cả 2 phương thức đăng nhập)
+```
+
+Không xin quyền GitHub nào ngoài thông tin public cơ bản (username, avatar, email công khai nếu có).
+
+### 5.2 Repo Share — fetch nhẹ, không bắt buộc
+
+```text
+User dán link GitHub repo
  ↓
-Supabase Auth / User
+Backend thử gọi GitHub API 1 lần (timeout ngắn, vd. 3s)
  ↓
-Sync GitHub profile
+Thành công → điền sẵn tên/mô tả/stars/ngôn ngữ vào form (user vẫn sửa được)
  ↓
-Tạo/cập nhật DevNest profile
+Thất bại/timeout/rate limit → form vẫn mở, user tự nhập tay, không chặn việc đăng bài
 ```
 
-DevNest chỉ yêu cầu quyền tối thiểu cần thiết cho MVP.
+Không có bước cache, không có job refresh định kỳ, không lưu README. Metadata được lưu **đúng một lần** tại thời điểm đăng, y như dữ liệu blog/project khác — nếu sau này số liệu (stars...) đổi thì đã cũ, và điều đó chấp nhận được ở MVP.
 
-**Nguyên tắc:** không yêu cầu quyền truy cập private repository nếu MVP chưa cần.
+Xem mục 12 để biết đầy đủ lý do vì sao MVP không làm sâu hơn phần này.
 
 ---
 
-## 5.2 Đồng bộ GitHub Profile
+# 6. Tech Stack
 
-Sau khi đăng nhập, DevNest lấy thông tin GitHub profile và lưu các trường cần thiết.
-
-### Thông tin có thể đồng bộ
-
-| Field | Mục đích |
-|---|---|
-| GitHub username | định danh tài khoản |
-| Display name | tên hiển thị |
-| Avatar | ảnh profile |
-| Bio | mô tả |
-| Company | thông tin công việc |
-| Location | vị trí |
-| Website | liên kết ngoài |
-| GitHub URL | link GitHub |
-| Followers | thống kê |
-| Following | thống kê |
-| Public repositories | thống kê |
-| GitHub account created date | thông tin profile |
-
-### Profile DevNest
-
-Profile không phụ thuộc hoàn toàn vào GitHub. User vẫn có thể bổ sung:
-
+## 6.1 Frontend (`client/`)
 ```text
-DevNest Profile
-├── avatar
-├── display name
-├── bio
-├── location
-├── website
-├── GitHub username
-├── skills / tags
-├── blog posts
-├── project showcases
-├── shared repositories
-└── GitHub statistics
-```
-
-GitHub được xem là nguồn xác thực và dữ liệu kỹ thuật, còn DevNest lưu thêm các nội dung/community data riêng.
-
----
-
-## 5.3 Refresh GitHub Profile
-
-User có nút:
-
-```text
-[Sync GitHub]
-```
-
-Khi click:
-
-```text
-DevNest
-  ↓
-GitHub API
-  ↓
-Get authenticated user
-  ↓
-Update profile
-```
-
-Không gọi GitHub API mỗi lần profile được mở.
-
-Có thể áp dụng:
-
-- cache profile;
-- refresh thủ công;
-- refresh định kỳ ở giai đoạn sau.
-
----
-
-## 5.4 Share Repository
-
-User nhập GitHub URL:
-
-```text
-https://github.com/owner/repository
-```
-
-Backend thực hiện:
-
-```text
-Validate URL
-     ↓
-Parse owner/repository
-     ↓
-GitHub API: Get repository
-     ↓
-Validate repository
-     ↓
-Get metadata
-     ↓
-Get README
-     ↓
-Save/cache in Supabase
-     ↓
-Create Repo Post
-```
-
-### Metadata cần lưu
-
-```text
-repo_url
-owner
-owner_avatar
-name
-full_name
-description
-stars
-forks
-watchers
-open_issues
-language
-languages
-topics
-license
-default_branch
-created_at
-updated_at
-github_updated_at
-last_synced_at
-```
-
-### UI Repository Card
-
-```text
-┌───────────────────────────────────────────┐
-│  owner / repository                       │
-│                                           │
-│  Repository description                   │
-│                                           │
-│  ⭐ 1.2K   🍴 150   TypeScript            │
-│                                           │
-│  Topics: react · ai · developer-tools     │
-│                                           │
-│  [Read README] [View on GitHub]           │
-└───────────────────────────────────────────┘
-```
-
----
-
-## 5.5 Lấy README
-
-Khi import repository, backend có thể lấy README từ GitHub.
-
-Flow:
-
-```text
-Repository URL
-       ↓
-Get Repository
-       ↓
-Get Repository README
-       ↓
-Decode / parse README
-       ↓
-Sanitize
-       ↓
-Store/cache README
-       ↓
-Render trong DevNest
-```
-
-README được sử dụng để:
-
-- tạo preview repository;
-- giúp người dùng khám phá project mà không phải rời DevNest;
-- hiển thị documentation cơ bản;
-- hỗ trợ search nội dung README nếu cần.
-
-### Nguyên tắc
-
-DevNest **không cần download toàn bộ source code**.
-
-Chỉ lấy README và metadata cần thiết.
-
----
-
-## 5.6 Repository Refresh / Sync
-
-Repository card có:
-
-```text
-Last synced: 2 hours ago
-[Refresh]
-```
-
-Khi refresh:
-
-```text
-DevNest DB
-    ↓
-Kiểm tra last_synced_at
-    ↓
-Nếu đủ thời gian refresh
-    ↓
-GitHub API
-    ↓
-Update metadata + README
-```
-
-MVP có thể chọn chiến lược:
-
-- sync khi repo được import;
-- refresh thủ công;
-- refresh định kỳ 6–12 giờ cho repo đã được sử dụng nhiều.
-
-Không refresh mỗi lần user mở feed.
-
----
-
-## 5.7 GitHub Repository Cache
-
-GitHub data phải được cache trong Supabase/Postgres.
-
-```text
-Client
-  ↓
-Node.js
-  ↓
-Supabase Cache
-  ↓
-Nếu cache còn hợp lệ → trả dữ liệu
-  ↓
-Nếu hết hạn → GitHub API
-  ↓
-Update cache
-```
-
-Mục đích:
-
-- giảm số request GitHub;
-- giảm latency;
-- tránh phụ thuộc hoàn toàn vào GitHub trong mỗi page load;
-- tránh chạm rate limit.
-
----
-
-## 5.8 Xử lý repository không hợp lệ
-
-Các trường hợp cần xử lý:
-
-```text
-Repo không tồn tại
-Repo đã bị xóa
-Repo bị đổi tên
-Repo URL sai
-GitHub timeout
-GitHub rate limit
-README không tồn tại
-README quá lớn / không thể parse
-```
-
-Frontend phải hiển thị lỗi có ý nghĩa:
-
-```text
-❌ Không tìm thấy repository này.
-
-❌ Không thể đồng bộ GitHub lúc này.
-
-⚠️ README chưa có hoặc không thể tải.
-
-⚠️ GitHub API đang giới hạn request, vui lòng thử lại sau.
-```
-
----
-
-## 5.9 Source Code Repository — không tải trong MVP
-
-MVP **không lưu toàn bộ source code repository**.
-
-```text
-GitHub
- └── Source code ← giữ tại GitHub
-
-DevNest
- ├── Repository metadata
- ├── README
- ├── Topics
- └── Cache information
-```
-
-Lý do:
-
-- giảm storage;
-- giảm độ phức tạp;
-- tránh phải đồng bộ version;
-- tránh tải dữ liệu không cần thiết;
-- phù hợp với mục tiêu MVP.
-
-Việc clone/download source chỉ được xem xét khi DevNest có tính năng phân tích code, AI hoặc các workflow kỹ thuật cần repository contents.
-
----
-
-# 6. Tính năng đề xuất bổ sung
-
-## 6.1 Nên có ngay trong MVP
-
-| Tính năng | Lý do |
-|---|---|
-| Onboarding chọn tag | cá nhân hóa feed |
-| Draft | tránh mất nội dung |
-| Report / Flag | vận hành cộng đồng |
-| Pagination / infinite scroll | hiệu năng feed |
-| Empty state & error state | UX |
-| Dynamic SEO metadata | hỗ trợ index/search |
-| GitHub Profile Sync | profile có dữ liệu ngay sau signup |
-| Repository README preview | giúp khám phá repo trực tiếp |
-| Sync status | cho biết dữ liệu GitHub cập nhật lúc nào |
-
-## 6.2 Có thể làm sau khi có traction
-
-| Tính năng | Mục đích |
-|---|---|
-| Email digest | tăng retention |
-| Dark mode | UX |
-| Admin/moderation dashboard | xử lý report |
-| Analytics cho tác giả | tăng động lực viết |
-| Rate limiting nâng cao | chống spam/bot |
-| GitHub activity | hiển thị activity gần đây |
-| GitHub pinned repositories | nâng chất lượng profile |
-| Project auto-sync | giảm thao tác thủ công |
-
----
-
-# 7. Tech Stack đề xuất
-
-## 7.1 Frontend
-
-```text
-React 18
+React 19
 Vite
 TypeScript
 Tailwind CSS
 React Router
-TanStack Query
-Zustand
-react-helmet-async
-react-markdown
-shiki
-Axios / Fetch
+react-markdown + remark-gfm
 ```
 
-## 7.2 Backend
-
+## 6.2 Backend (`server/`)
 ```text
 Node.js
-Express hoặc NestJS
+Express
 TypeScript
-Octokit
-Zod / validation library
-Rate limiter
+Octokit          — chỉ dùng cho fetch nhẹ một lần ở Repo Share (mục 5.2)
 ```
 
-Backend chịu trách nhiệm:
+Backend chịu trách nhiệm: business logic cần giữ bí mật (GitHub token khi fetch metadata), validate input, và mọi thao tác cần bỏ qua RLS.
 
-- xác thực request;
-- business logic;
-- gọi GitHub API;
-- GitHub profile sync;
-- repository import;
-- README fetch;
-- cache;
-- sitemap;
-- error handling;
-- logging.
+Phần lớn CRUD (đăng bài, like, comment, follow...) gọi thẳng từ React sang Supabase, được bảo vệ bằng Row Level Security — không cần qua Node cho mọi request.
 
-## 7.3 Database / Backend Services
-
+## 6.3 Database / Backend Services
 ```text
 Supabase
-├── PostgreSQL
-├── Auth
-├── Storage
-└── Realtime
-```
-
-## 7.4 GitHub
-
-```text
-GitHub OAuth
-GitHub REST API
-Octokit
-```
-
-GitHub được tích hợp chủ yếu qua backend Node.js thay vì để frontend gọi trực tiếp.
-
----
-
-# 8. Kiến trúc tổng thể
-
-```text
-                         ┌─────────────────┐
-                         │     GitHub      │
-                         │                 │
-                         │ OAuth           │
-                         │ User API        │
-                         │ Repository API  │
-                         │ README API      │
-                         └────────┬────────┘
-                                  │
-                               Octokit
-                                  │
-┌───────────────┐          ┌──────▼───────┐
-│ React + Vite  │ REST/JSON│   Node.js    │
-│               │─────────>│   Backend    │
-│ Feed          │<─────────│              │
-│ Profile       │          │ Auth         │
-│ Blog          │          │ GitHub       │
-│ Project       │          │ Repository   │
-│ Repo          │          │ README       │
-└───────────────┘          │ Cache        │
-                           └──────┬───────┘
-                                  │
-                                  ▼
-                           ┌───────────────┐
-                           │   Supabase    │
-                           │               │
-                           │ PostgreSQL    │
-                           │ Auth          │
-                           │ Storage       │
-                           │ Realtime      │
-                           └───────────────┘
-```
-
-### GitHub Repository Import Flow
-
-```text
-User
- ↓
-Enter GitHub URL
- ↓
-React
- ↓
-POST /api/github/repositories/import
- ↓
-Node.js
- ↓
-GitHub REST API
- ├── Get repository
- └── Get README
- ↓
-Normalize + sanitize
- ↓
-Upsert Repository Cache
- ↓
-Create Repo Post
- ↓
-Supabase
- ↓
-React render
-```
-
-### GitHub Profile Sync Flow
-
-```text
-GitHub OAuth
- ↓
-Supabase / Backend authentication
- ↓
-GitHub access token
- ↓
-GET authenticated user
- ↓
-Normalize profile data
- ↓
-Upsert DevNest profile
- ↓
-User profile page
+├── PostgreSQL   — dữ liệu chính, full-text search
+├── Auth         — email/password VÀ GitHub OAuth provider
+└── Storage      — ảnh cover/avatar
 ```
 
 ---
 
-# 9. Mô hình dữ liệu chính
-
-## 9.1 users
+# 7. Kiến trúc tổng thể
 
 ```text
-id
-github_user_id
-github_username
-email
-created_at
-updated_at
-```
-
-## 9.2 profiles
-
-```text
-id
-user_id
-display_name
-avatar_url
-bio
-location
-website
-github_username
-skills
-created_at
-updated_at
-```
-
-## 9.3 posts
-
-```text
-id
-author_id
-type                # blog | project | repo
-title
-slug
-content
-cover_image
-published_at
-created_at
-updated_at
-```
-
-## 9.4 repositories
-
-```text
-id
-owner
-name
-full_name
-github_url
-description
-avatar_url
-stars
-forks
-watchers
-open_issues
-language
-languages
-topics
-license
-default_branch
-readme_content
-readme_html
-github_updated_at
-last_synced_at
-sync_status
-created_at
-updated_at
-```
-
-## 9.5 post_repositories
-
-Liên kết repository với post.
-
-```text
-post_id
-repository_id
-```
-
-## 9.6 tags
-
-```text
-id
-name
-slug
-```
-
-## 9.7 post_tags
-
-```text
-post_id
-tag_id
-```
-
-## 9.8 likes
-
-```text
-user_id
-post_id
-created_at
-```
-
-## 9.9 comments
-
-```text
-id
-user_id
-post_id
-content
-created_at
-updated_at
-```
-
-## 9.10 bookmarks
-
-```text
-user_id
-post_id
-created_at
-```
-
-## 9.11 follows
-
-```text
-follower_id
-following_user_id
-created_at
-```
-
-## 9.12 tag_follows
-
-```text
-user_id
-tag_id
-created_at
+┌───────────────┐          ┌──────────────┐          ┌───────────────┐
+│  React + Vite │  REST    │   Node.js    │  Octokit │    GitHub     │
+│               │─────────>│   (Express)  │─────────>│  REST API     │
+│  Feed/Blog/   │          │              │          │ (fetch nhẹ,   │
+│  Project/Q&A  │          │  Repo Share  │<─────────│  không cache) │
+│  Repo/Profile │          │  fetch nhẹ   │          └───────────────┘
+└───────┬───────┘          └──────────────┘
+        │
+        │ CRUD trực tiếp qua RLS (auth, posts, like, comment, follow, search)
+        ▼
+┌────────────────────┐
+│      Supabase       │
+│ Postgres · Auth ·   │
+│ Storage             │
+└────────────────────┘
 ```
 
 ---
 
-# 10. API chính của Backend
+# 8. Mô hình dữ liệu
 
-## Authentication
+Dùng một bảng cha chung `content_items` cho cả 4 loại nội dung — feed, tag, like, comment, bookmark, search chỉ cần biết `content_items`, không cần quan tâm loại nội dung cụ thể là gì. Mỗi loại nội dung có một bảng con riêng chỉ chứa field đặc thù của nó (khớp đúng `supabase/schema.sql` hiện có, cộng thêm bảng `questions` mới cho Q&A).
 
-```http
-GET /api/auth/github
-GET /api/auth/github/callback
-POST /api/auth/logout
+```text
+content_items (id, author_id, kind, title, search_vector, created_at, updated_at)
+  kind ∈ {'post', 'project', 'repo', 'question'}
+  │
+  ├── posts        (body_markdown, cover_image_url, published, published_at)
+  ├── projects      (description, status, repo_url, demo_url, cover_image_url)
+  ├── repos         (github_url, owner, name, description, stars, primary_language, note)
+  └── questions      (body_markdown, status, accepted_comment_id)   ← MỚI, chưa có trong schema.sql
+
+content_tags   (content_id, tag_id)
+tags           (id, name, slug)
+likes          (user_id, content_id)
+comments       (id, content_id, author_id, body, created_at, is_accepted_answer)
+bookmarks      (user_id, content_id)
+user_follows   (follower_id, followee_id)
+tag_follows    (user_id, tag_id)
+profiles       (id, username, github_username, avatar_url, bio)
 ```
 
-## Profile
-
-```http
-GET /api/profile/me
-PATCH /api/profile/me
-POST /api/profile/github/sync
-GET /api/profile/:username
-```
-
-## GitHub Repository
-
-```http
-POST /api/github/repositories/import
-GET /api/github/repositories/:id
-POST /api/github/repositories/:id/sync
-```
-
-## Posts
-
-```http
-GET /api/posts
-POST /api/posts
-GET /api/posts/:slug
-PATCH /api/posts/:id
-DELETE /api/posts/:id
-```
-
-## Interaction
-
-```http
-POST /api/posts/:id/like
-DELETE /api/posts/:id/like
-
-POST /api/posts/:id/bookmark
-DELETE /api/posts/:id/bookmark
-
-POST /api/posts/:id/comments
-GET /api/posts/:id/comments
-```
-
-## Search
-
-```http
-GET /api/search?q=
-```
-
-Backend phải chịu trách nhiệm gọi GitHub API. Frontend **không lưu GitHub Client Secret / access token nhạy cảm** và không nên tự gọi GitHub API cho các nghiệp vụ server-side.
+> **Việc cần làm khi bắt đầu code Q&A** (không nằm trong lượt sửa tài liệu này): thêm bảng `questions`, mở rộng `content_items_kind_check` để nhận `'question'`, và thêm cột `is_accepted_answer boolean` vào `comments` — cập nhật `supabase/schema.sql` + RLS policy tương ứng.
 
 ---
 
-# 11. Yêu cầu phi chức năng
+# 9. API chính của Backend
+
+Phần lớn thao tác gọi thẳng Supabase từ client (xem mục 6.2). Backend Node chỉ cần các route sau:
+
+```http
+POST /api/repos/lookup       # fetch nhẹ metadata GitHub cho Repo Share (đã có, server/src/routes/repos.ts)
+GET  /api/health
+```
+
+Mọi CRUD khác (posts, projects, questions, repos, likes, comments, bookmarks, follows, search) đi thẳng qua Supabase client SDK với RLS, không cần route Express riêng ở MVP.
+
+---
+
+# 10. Yêu cầu phi chức năng
 
 | Hạng mục | Yêu cầu MVP |
 |---|---|
 | Hiệu năng | Feed first load < 2.5s trên 4G |
-| API | Endpoint đọc phổ biến mục tiêu < 300ms khi dùng cache |
-| Bảo mật | RLS bật cho dữ liệu user |
-| Markdown | sanitize để chống XSS |
-| GitHub token | không expose secret/token nhạy cảm ở frontend |
-| GitHub API | cache metadata và README |
-| Rate limit | giới hạn request từ client và xử lý GitHub rate limit |
-| Reliability | GitHub timeout không làm toàn bộ DevNest lỗi |
-| SEO | blog/project/profile có title/meta/OpenGraph |
-| Accessibility | keyboard navigation, alt text, contrast cơ bản |
-| Responsive | hỗ trợ mobile |
-| Logging | log request/error/sync status |
-| Observability | theo dõi GitHub API errors và sync failures |
+| Bảo mật | RLS bật cho mọi bảng chứa dữ liệu user |
+| Markdown | Sanitize để chống XSS |
+| GitHub token | Không expose secret/token nhạy cảm ở frontend |
+| Repo Share | Timeout fetch GitHub ngắn (≤ 3s), không chặn luồng đăng bài khi lỗi |
+| SEO | Blog/project/Q&A/profile có title/meta/OpenGraph |
+| Accessibility | Keyboard navigation, alt text, contrast cơ bản |
+| Responsive | Hỗ trợ mobile |
+| Logging | Log request/error cơ bản |
 
 ---
 
-# 12. Giả định & Rủi ro
+# 11. Giả định & Rủi ro
 
-## 12.1 GitHub API rate limit
+## 11.1 Cộng đồng trống khi ra mắt
+Tự mồi 20–30 bài chất lượng (đa dạng cả 4 loại nội dung, không chỉ repo) trước khi mời user đầu tiên.
 
-GitHub có giới hạn request đối với API. Vì vậy DevNest không được thiết kế theo mô hình:
+## 11.2 SEO với React SPA
+React SPA có hạn chế với SEO. MVP dùng dynamic meta tags + sitemap. Nếu SEO trở thành kênh tăng trưởng chính, có thể chuyển route công khai sang SSR ở giai đoạn sau.
 
-```text
-mỗi lượt xem repo
-       ↓
-gọi GitHub API
-```
+## 11.3 Chất lượng dữ liệu Repo Share
+Vì không cache/refresh, số liệu (stars...) của repo đã share sẽ cũ dần theo thời gian — chấp nhận được ở MVP, ghi rõ "Dữ liệu tại thời điểm chia sẻ" trên UI để không gây hiểu nhầm.
 
-Mà phải là:
+## 11.4 Q&A có thể không đủ câu trả lời lúc đầu
+Nếu cộng đồng nhỏ, câu hỏi có thể không được trả lời kịp. Cần theo dõi chỉ số "tỷ lệ câu hỏi có câu trả lời" (mục 2) và cân nhắc cơ chế nhắc người follow tag liên quan nếu tỷ lệ thấp.
 
-```text
-request
- ↓
-cache
- ↓
-nếu cache hợp lệ → trả ngay
- ↓
-nếu hết hạn → refresh GitHub
-```
+---
 
-## 12.2 GitHub API không khả dụng
+# 12. Vì sao đơn giản hoá GitHub integration
 
-Repository đã import vẫn phải có khả năng hiển thị bằng dữ liệu cache.
+Bản nháp trước bắt buộc đăng nhập bằng GitHub OAuth và tự động đồng bộ toàn bộ GitHub profile, cache + refresh định kỳ metadata mọi repo, và fetch/hiển thị README — tương đương một hệ thống cache/sync riêng phải vận hành 24/7. Sau khi rà lại, hai vấn đề khiến phần này **chưa khả thi cho MVP**:
 
-```text
-GitHub DOWN
-   ↓
-DevNest
-   ↓
-Hiển thị cached data
-   ↓
-"Last synced 5 hours ago"
-```
+1. **Quá nhiều việc backend so với giá trị chứng minh được**: cần Octokit + tầng cache Postgres + job refresh định kỳ + xử lý đủ loại lỗi (repo bị xoá/đổi tên, README quá lớn, GitHub timeout...) — trong khi MVP chỉ cần biết "cộng đồng có thích tính năng share repo hay không", không cần dữ liệu GitHub luôn mới nhất.
+2. **Rủi ro rate limit khi scale**: GitHub giới hạn 5.000 request/giờ dù đã xác thực. Một cơ chế refresh định kỳ cho *mọi* repo đã share sẽ chạm giới hạn này rất nhanh khi số lượng repo tăng, và việc xử lý đúng đắn (backoff, hàng đợi, cache invalidation) là một hạng mục kỹ thuật riêng, không nên làm trước khi biết tính năng có được dùng nhiều hay không.
 
-## 12.3 README thay đổi
+Ngoài ra, bắt buộc GitHub OAuth để đăng nhập vô tình giới hạn cộng đồng chỉ còn dev có tài khoản GitHub công khai quen thuộc, trong khi DevNest muốn là nơi cho **mọi loại nội dung developer** (kể cả Q&A không liên quan gì đến một repo cụ thể).
 
-README cần có `last_synced_at` và trạng thái sync để DevNest có thể cập nhật định kỳ hoặc theo yêu cầu.
-
-## 12.4 OAuth permissions
-
-Chỉ xin quyền GitHub thực sự cần thiết. Không yêu cầu quyền private repository trong MVP nếu tính năng không dùng tới.
-
-## 12.5 Source code quá lớn
-
-Không download full repository trong MVP. Điều này giúp giảm storage, network bandwidth và độ phức tạp đồng bộ.
-
-## 12.6 Cộng đồng trống khi ra mắt
-
-Tự mồi 20–30 bài chất lượng trước khi mời user đầu tiên.
-
-## 12.7 SEO với React SPA
-
-React SPA có hạn chế đối với SEO. MVP sử dụng dynamic meta tags, sitemap và các biện pháp pre-render nếu cần. Nếu SEO trở thành kênh tăng trưởng chính, có thể chuyển các route public sang framework SSR ở giai đoạn sau.
+→ MVP giữ lại đúng phần giá trị cốt lõi (dán link + ghi chú cá nhân, có gợi ý điền sẵn nếu GitHub API sẵn sàng), và dời toàn bộ phần vận hành phức tạp sang **Phase 2 — GitHub sâu hơn** (mục 13), sau khi đã có dữ liệu thực tế về mức độ dùng tính năng.
 
 ---
 
 # 13. Roadmap sau MVP
 
 ## Phase 1 — MVP
-
 ```text
-✅ GitHub OAuth
-✅ GitHub Profile Sync
-✅ Blog
-✅ Project Showcase
-✅ Repository Import
-✅ Repository Metadata
-✅ README Import
-✅ Repository Cache
-✅ Feed
-✅ Like / Comment / Bookmark
-✅ Follow
-✅ Search
+✅ Auth: email/password + GitHub OAuth (tuỳ chọn)
+✅ Blog, Project Showcase, Q&A, Repo Share (đơn giản)
+✅ Feed, Tag, Search
+✅ Like / Comment / Bookmark / Follow
 ✅ Profile
 ```
 
 ## Phase 2 — GitHub sâu hơn
-
 ```text
-🔜 GitHub activity
-🔜 Pinned repositories
-🔜 Repository sync tự động
-🔜 Commit / release information
-🔜 Changelog integration
+🔜 Auto-sync GitHub profile (followers, company, location, public repos)
+🔜 Cache + refresh định kỳ metadata repo
+🔜 Fetch & hiển thị README trong app
+🔜 GitHub activity, pinned repositories
 🔜 GitHub webhook
+🔜 Rate-limit handling nâng cao (queue, backoff)
 ```
 
 ## Phase 3 — AI & Developer Intelligence
-
 ```text
-🔜 AI đọc README
-🔜 AI tạo project summary
-🔜 AI tạo project tags
-🔜 AI phân tích cấu trúc repository
+🔜 AI đọc README, tạo project summary
+🔜 AI gợi ý tag
 🔜 AI hỗ trợ viết documentation
 ```
 
 ## Phase 4 — Community Platform
-
 ```text
-🔜 Reputation
-🔜 Badge
+🔜 Reputation / Badge (đặc biệt hữu ích cho Q&A)
 🔜 Job board
-🔜 Collaboration
 🔜 Public API
 🔜 Cross-posting
 ```
-
----
-
-# Kết luận kiến trúc GitHub cho DevNest
-
-GitHub trong DevNest đóng vai trò **identity provider + nguồn dữ liệu kỹ thuật**, không phải nơi để DevNest sao chép toàn bộ source code.
-
-```text
-GitHub
-├── OAuth
-│   └── Login / Identity
-│
-├── User API
-│   └── Profile Sync
-│
-└── Repository API
-    ├── Repository metadata
-    ├── Stars / Forks
-    ├── Languages
-    ├── Topics
-    ├── License
-    └── README
-            ↓
-        Node.js
-            ↓
-        Cache / Normalize
-            ↓
-        Supabase
-            ↓
-        DevNest UI
-```
-
-MVP chỉ lưu những dữ liệu cần thiết để tạo trải nghiệm khám phá repository tốt. **Full source code vẫn nằm trên GitHub** và người dùng có thể chuyển sang GitHub bằng nút `View on GitHub`.
-
