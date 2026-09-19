@@ -1,56 +1,49 @@
-const PLACEHOLDER_FEED = [
-  {
-    kind: "post" as const,
-    title: "Vì sao mình chuyển từ REST sang tRPC cho side-project",
-    author: "quocvietpham185",
-    tags: ["typescript", "trpc"],
-  },
-  {
-    kind: "project" as const,
-    title: "DevNest — nền tảng cộng đồng cho developer",
-    author: "quocvietpham185",
-    tags: ["react", "express", "supabase"],
-  },
-  {
-    kind: "repo" as const,
-    title: "supabase/supabase",
-    author: "quocvietpham185",
-    tags: ["postgres", "backend-as-a-service"],
-  },
-];
-
-const KIND_LABEL: Record<(typeof PLACEHOLDER_FEED)[number]["kind"], string> = {
-  post: "Blog",
-  project: "Project",
-  repo: "Repo",
-};
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { fetchFeed, type FeedItem } from "../lib/content";
+import { ContentCard } from "../components/ContentCard";
+import { EmptyState, ErrorState } from "../components/EmptyState";
 
 export function Home() {
+  const [params, setParams] = useSearchParams();
+  const tag = params.get("tag") ?? undefined;
+  const [items, setItems] = useState<FeedItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetchFeed({ tag })
+      .then(setItems)
+      .catch((err) => setError(err instanceof Error ? err.message : "Không tải được feed"))
+      .finally(() => setLoading(false));
+  }, [tag]);
+
   return (
-    <ul className="flex flex-col gap-4">
-      {PLACEHOLDER_FEED.map((item) => (
-        <li
-          key={item.title}
-          className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
-        >
-          <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            {KIND_LABEL[item.kind]}
-          </span>
-          <h2 className="mt-1 text-base font-medium text-zinc-950 dark:text-zinc-50">
-            {item.title}
-          </h2>
-          <div className="mt-2 flex items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
-            <span>@{item.author}</span>
-            <span className="flex gap-1.5">
-              {item.tags.map((tag) => (
-                <span key={tag} className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs dark:bg-zinc-800">
-                  #{tag}
-                </span>
-              ))}
-            </span>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <div className="flex flex-col gap-4">
+      {tag && (
+        <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+          Đang lọc theo <span className="font-medium text-accent-600 dark:text-accent-400">#{tag}</span>
+          <button onClick={() => setParams({})} className="text-xs underline">
+            Bỏ lọc
+          </button>
+        </div>
+      )}
+
+      {loading ? (
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">Đang tải feed...</p>
+      ) : error ? (
+        <ErrorState message={error} />
+      ) : items.length === 0 ? (
+        <EmptyState title="Chưa có nội dung nào" hint="Là người đầu tiên đăng blog, project, câu hỏi hoặc repo!" />
+      ) : (
+        <ul className="flex flex-col gap-4">
+          {items.map((item) => (
+            <ContentCard key={item.id} item={item} />
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }

@@ -56,7 +56,7 @@ create table public.tags (
 create table public.content_items (
   id uuid primary key default gen_random_uuid(),
   author_id uuid not null references public.profiles (id) on delete cascade,
-  kind text not null check (kind in ('post', 'project', 'repo')),
+  kind text not null check (kind in ('post', 'project', 'repo', 'question')),
   title text not null,
   search_vector tsvector,
   created_at timestamptz not null default now(),
@@ -111,6 +111,17 @@ create table public.repos (
   metadata_fetched_at timestamptz not null default now()
 );
 
+-- ---------------------------------------------------------------------------
+-- Q&A questions (comments on a question double as answers — see is_accepted
+-- below; accepted_comment_id is nullable until the asker picks a best answer)
+-- ---------------------------------------------------------------------------
+create table public.questions (
+  id uuid primary key references public.content_items (id) on delete cascade,
+  body_markdown text not null,
+  status text not null default 'open' check (status in ('open', 'resolved')),
+  accepted_comment_id uuid
+);
+
 -- Keep content_items.search_vector in sync whenever a child row changes.
 create function public.sync_content_search_vector()
 returns trigger as $$
@@ -121,6 +132,7 @@ begin
   select title into v_title from public.content_items where id = coalesce(new.id, old.id);
 
   v_body := coalesce(new.body_markdown, new.description, new.note, '');
+  -- Note: `questions.body_markdown` is covered too — same column name as `posts`.
 
   update public.content_items
   set search_vector = setweight(to_tsvector('simple', coalesce(v_title, '')), 'A')
@@ -144,6 +156,10 @@ create trigger repos_search_sync
   after insert or update on public.repos
   for each row execute function public.sync_content_search_vector();
 
+create trigger questions_search_sync
+  after insert or update on public.questions
+  for each row execute function public.sync_content_search_vector();
+
 -- ---------------------------------------------------------------------------
 -- Social: likes, comments, bookmarks, follows
 -- ---------------------------------------------------------------------------
@@ -159,8 +175,14 @@ create table public.comments (
   content_id uuid not null references public.content_items (id) on delete cascade,
   author_id uuid not null references public.profiles (id) on delete cascade,
   body text not null,
+  -- Only meaningful when the parent content_items.kind = 'question'.
+  is_accepted_answer boolean not null default false,
   created_at timestamptz not null default now()
 );
+
+alter table public.questions
+  add constraint questions_accepted_comment_fkey
+  foreign key (accepted_comment_id) references public.comments (id) on delete set null;
 
 create table public.bookmarks (
   user_id uuid not null references public.profiles (id) on delete cascade,
@@ -194,6 +216,7 @@ alter table public.content_tags enable row level security;
 alter table public.posts enable row level security;
 alter table public.projects enable row level security;
 alter table public.repos enable row level security;
+alter table public.questions enable row level security;
 alter table public.likes enable row level security;
 alter table public.comments enable row level security;
 alter table public.bookmarks enable row level security;
@@ -228,12 +251,18 @@ create policy "repos are publicly readable" on public.repos for select using (tr
 create policy "authors write own repos" on public.repos for all
   using (exists (select 1 from public.content_items c where c.id = id and c.author_id = auth.uid()));
 
+create policy "questions are publicly readable" on public.questions for select using (true);
+create policy "authors write own questions" on public.questions for all
+  using (exists (select 1 from public.content_items c where c.id = id and c.author_id = auth.uid()));
+
 create policy "likes are publicly readable" on public.likes for select using (true);
 create policy "users manage own likes" on public.likes for all using (auth.uid() = user_id);
 
 create policy "comments are publicly readable" on public.comments for select using (true);
 create policy "authenticated users create comments" on public.comments for insert to authenticated with check (auth.uid() = author_id);
 create policy "authors manage own comments" on public.comments for update using (auth.uid() = author_id);
+create policy "question owners mark accepted answer" on public.comments for update
+  using (exists (select 1 from public.content_items c where c.id = content_id and c.author_id = auth.uid()));
 create policy "authors delete own comments" on public.comments for delete using (auth.uid() = author_id);
 
 create policy "users see own bookmarks" on public.bookmarks for select using (auth.uid() = user_id);
