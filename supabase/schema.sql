@@ -229,6 +229,11 @@ alter table public.bookmarks enable row level security;
 alter table public.user_follows enable row level security;
 alter table public.tag_follows enable row level security;
 
+grant usage on schema public to anon, authenticated;
+grant select on public.content_items, public.profiles, public.tags,
+  public.content_tags, public.posts, public.projects, public.repos,
+  public.questions to anon, authenticated;
+
 -- Public read on everything content-shaped; writes limited to the owner.
 create policy "profiles are publicly readable" on public.profiles for select using (true);
 create policy "users update own profile" on public.profiles for update using (auth.uid() = id);

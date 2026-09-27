@@ -28,7 +28,7 @@ export interface FeedItem {
 
 const FEED_SELECT = `
   id, kind, title, created_at,
-  profiles ( id, username, avatar_url ),
+  profiles!content_items_author_id_fkey ( id, username, avatar_url ),
   content_tags ( tags ( name ) ),
   posts ( body_markdown, published ),
   projects ( description, status, repo_url, demo_url ),

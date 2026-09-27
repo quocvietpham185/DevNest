@@ -40,6 +40,9 @@ export function Navbar() {
           <NavLink to="/questions" className={navLinkClass}>
             Q&amp;A
           </NavLink>
+          <NavLink to="/repos" className={navLinkClass}>
+            Repos
+          </NavLink>
         </nav>
 
         <form onSubmit={handleSearch} className="ml-auto min-w-0 flex-1 max-w-xs">

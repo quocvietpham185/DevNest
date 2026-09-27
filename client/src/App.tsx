@@ -10,6 +10,7 @@ import { QuestionList } from "./pages/QuestionList";
 import { NewQuestion } from "./pages/NewQuestion";
 import { QuestionDetail } from "./pages/QuestionDetail";
 import { ShareRepo } from "./pages/ShareRepo";
+import { RepoList } from "./pages/RepoList";
 import { RepoDetail } from "./pages/RepoDetail";
 import { Profile } from "./pages/Profile";
 import { EditProfile } from "./pages/EditProfile";
@@ -32,6 +33,7 @@ export function App() {
           <Route path="/questions/new" element={<NewQuestion />} />
           <Route path="/questions/:id" element={<QuestionDetail />} />
           <Route path="/share-repo" element={<ShareRepo />} />
+          <Route path="/repos" element={<RepoList />} />
           <Route path="/repos/:id" element={<RepoDetail />} />
           <Route path="/u/:username" element={<Profile />} />
           <Route path="/settings/profile" element={<EditProfile />} />

@@ -27,7 +27,7 @@ export async function toggleBookmark(contentId: string, userId: string, bookmark
 const FEED_SELECT_FOR_BOOKMARKS = `
   content_items (
     id, kind, title, created_at,
-    profiles ( id, username, avatar_url ),
+    profiles!content_items_author_id_fkey ( id, username, avatar_url ),
     content_tags ( tags ( name ) ),
     posts ( body_markdown, published ),
     projects ( description, status, repo_url, demo_url ),
