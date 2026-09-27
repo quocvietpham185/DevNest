@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { fetchFeed, type FeedItem } from "../lib/content";
 import { ContentCard } from "../components/ContentCard";
 import { EmptyState, ErrorState } from "../components/EmptyState";
+import { FollowTagButton } from "../components/FollowTagButton";
 
 export function Home() {
   const [params, setParams] = useSearchParams();
@@ -25,6 +26,7 @@ export function Home() {
       {tag && (
         <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
           Đang lọc theo <span className="font-medium text-accent-600 dark:text-accent-400">#{tag}</span>
+          <FollowTagButton tag={tag} />
           <button onClick={() => setParams({})} className="text-xs underline">
             Bỏ lọc
           </button>

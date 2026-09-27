@@ -6,6 +6,8 @@ import { fetchContentById, type FeedItem } from "../lib/content";
 import { CommentSection } from "../components/CommentSection";
 import { TagPill } from "../components/TagPill";
 import { ErrorState } from "../components/EmptyState";
+import { LikeButton } from "../components/LikeButton";
+import { BookmarkButton } from "../components/BookmarkButton";
 
 const STATUS_LABEL: Record<string, string> = {
   open: "Chưa giải quyết",
@@ -60,7 +62,12 @@ export function QuestionDetail() {
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.bodyMarkdown ?? ""}</ReactMarkdown>
       </div>
 
-      <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
+      <div className="flex items-center gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+        <LikeButton contentId={item.id} />
+        <BookmarkButton contentId={item.id} />
+      </div>
+
+      <div>
         <CommentSection contentId={item.id} isQuestion questionAuthorId={item.author?.id} onAccepted={load} />
       </div>
     </article>

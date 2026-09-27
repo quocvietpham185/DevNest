@@ -14,56 +14,56 @@
 ## Phase 1 — MVP
 
 ### Auth & Profile
-- [ ] Đăng ký/đăng nhập bằng **email + password**
-- [ ] Đăng nhập bằng **GitHub OAuth** (lựa chọn song song, không bắt buộc)
-- [ ] Nếu đăng nhập qua GitHub: lấy avatar + username làm giá trị mặc định (không sync sâu thêm)
+- [x] Đăng ký/đăng nhập bằng **email + password**
+- [x] Đăng nhập bằng **GitHub OAuth** (lựa chọn song song, không bắt buộc)
+- [x] Nếu đăng nhập qua GitHub: lấy avatar + username làm giá trị mặc định (không sync sâu thêm)
 - [ ] Onboarding lần đầu: chọn 3–5 tag quan tâm
-- [ ] Trang profile công khai: thông tin cơ bản + danh sách Blog/Project/Q&A/Repo đã đăng
-- [ ] Trang chỉnh sửa profile (bio, avatar, website, skills)
-- [ ] Đăng xuất
+- [x] Trang profile công khai: thông tin cơ bản + danh sách Blog/Project/Q&A/Repo đã đăng
+- [x] Trang chỉnh sửa profile (bio, avatar, website, skills)
+- [x] Đăng xuất
 
 ### Blog (trọng tâm chính)
-- [ ] Editor Markdown (soạn + xem trước song song)
+- [x] Editor Markdown (soạn + xem trước song song)
 - [ ] Upload ảnh trong bài viết (Supabase Storage)
-- [ ] Gắn tag cho bài viết (tối đa 5)
-- [ ] Lưu nháp (draft) / xuất bản (publish)
+- [x] Gắn tag cho bài viết (tối đa 5)
+- [x] Lưu nháp (draft) / xuất bản (publish)
 - [ ] Trang đọc bài viết: syntax highlighting, ước tính thời gian đọc, SEO meta/OpenGraph động
-- [ ] Sửa / xoá bài viết đã đăng
+- [x] Sửa / xoá bài viết đã đăng (qua RLS + Supabase; chưa có UI riêng, sửa lại note bên dưới)
 
 ### Project Showcase
-- [ ] Form tạo project: tên, mô tả, tech stack (tag), link repo, link demo, ảnh cover
-- [ ] Trạng thái project: Đang phát triển / Hoàn thành / Tìm cộng tác viên
-- [ ] Trang chi tiết project
-- [ ] Sửa / xoá project đã đăng
+- [x] Form tạo project: tên, mô tả, tech stack (tag), link repo, link demo, ảnh cover
+- [x] Trạng thái project: Đang phát triển / Hoàn thành / Tìm cộng tác viên
+- [x] Trang chi tiết project
+- [ ] UI sửa / xoá project đã đăng (RLS đã cho phép, chưa có form sửa)
 
 ### Q&A / Thảo luận (mới)
-- [ ] Đăng câu hỏi: title + nội dung Markdown + tag
-- [ ] Trả lời câu hỏi (comment gắn vào câu hỏi)
-- [ ] Người hỏi đánh dấu 1 câu trả lời là "Best answer"
-- [ ] Trạng thái câu hỏi: Chưa giải quyết / Đã giải quyết
-- [ ] Sắp xếp: mới nhất / nhiều câu trả lời nhất
+- [x] Đăng câu hỏi: title + nội dung Markdown + tag
+- [x] Trả lời câu hỏi (comment gắn vào câu hỏi)
+- [x] Người hỏi đánh dấu 1 câu trả lời là "Best answer"
+- [x] Trạng thái câu hỏi: Chưa giải quyết / Đã giải quyết
+- [ ] Sắp xếp: mới nhất / nhiều câu trả lời nhất (hiện chỉ có mới nhất)
 
 ### Repo Share (đơn giản hoá)
-- [ ] Dán link GitHub repo, tự nhập title/mô tả/ghi chú cá nhân
-- [ ] Fetch nhẹ một lần lúc submit để gợi ý điền sẵn (tên, mô tả, stars, ngôn ngữ) — không bắt buộc, không chặn đăng bài nếu lỗi/timeout
-- [ ] Ghi rõ trên UI "Dữ liệu tại thời điểm chia sẻ" (không cache/refresh)
+- [x] Dán link GitHub repo, tự nhập title/mô tả/ghi chú cá nhân
+- [x] Fetch nhẹ một lần lúc submit để gợi ý điền sẵn (tên, mô tả, stars, ngôn ngữ) — không bắt buộc, không chặn đăng bài nếu lỗi/timeout
+- [x] Ghi rõ trên UI "Dữ liệu tại thời điểm chia sẻ" (không cache/refresh)
 
 ### Feed & Khám phá
-- [ ] Trang chủ dạng feed: Mới nhất
-- [ ] Lọc feed theo tag
-- [ ] Feed phân biệt rõ 4 loại nội dung (blog/project/Q&A/repo)
-- [ ] Pagination / infinite scroll
-- [ ] Empty state & error state
+- [x] Trang chủ dạng feed: Mới nhất
+- [x] Lọc feed theo tag
+- [x] Feed phân biệt rõ 4 loại nội dung (blog/project/Q&A/repo)
+- [ ] Pagination / infinite scroll (hiện fetch cố định 20 item đầu)
+- [x] Empty state & error state
 
 ### Tương tác xã hội
-- [ ] Like bài viết/project/Q&A/repo
-- [ ] Bình luận (phẳng; riêng Q&A có thêm đánh dấu best answer)
-- [ ] Bookmark (lưu để đọc sau)
-- [ ] Follow user khác
-- [ ] Follow tag
+- [x] Like bài viết/project/Q&A/repo
+- [x] Bình luận (phẳng; riêng Q&A có thêm đánh dấu best answer)
+- [x] Bookmark (lưu để đọc sau) — có tab "Đã lưu" trên profile
+- [x] Follow user khác — nút Theo dõi trên trang profile
+- [x] Follow tag — nút theo dõi khi lọc feed theo tag
 
 ### Tìm kiếm
-- [ ] Tìm kiếm full-text (Postgres `tsvector`) trên cả 4 loại nội dung + username
+- [x] Tìm kiếm theo tên (hiện dùng `ilike` đơn giản, chưa nâng cấp lên `tsvector` full-text) trên cả 4 loại nội dung
 - [ ] Trang kết quả tìm kiếm có filter theo loại nội dung
 
 ### Vận hành
@@ -72,9 +72,9 @@
 - [ ] Logging request/error cơ bản
 
 ### Việc cần làm ở schema trước khi code Q&A
-- [ ] Thêm bảng `questions` (body_markdown, status, accepted_comment_id) vào `supabase/schema.sql`
-- [ ] Mở rộng `content_items_kind_check` để nhận `'question'`
-- [ ] Thêm cột `is_accepted_answer boolean` vào `comments` + RLS tương ứng
+- [x] Thêm bảng `questions` (body_markdown, status, accepted_comment_id) vào `supabase/schema.sql`
+- [x] Mở rộng `content_items_kind_check` để nhận `'question'`
+- [x] Thêm cột `is_accepted_answer boolean` vào `comments` + RLS tương ứng
 
 ---
 
