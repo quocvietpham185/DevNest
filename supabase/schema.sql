@@ -131,8 +131,14 @@ declare
 begin
   select title into v_title from public.content_items where id = coalesce(new.id, old.id);
 
-  v_body := coalesce(new.body_markdown, new.description, new.note, '');
-  -- Note: `questions.body_markdown` is covered too — same column name as `posts`.
+  -- Child tables do not share the same body column, so inspect the row as JSON
+  -- instead of dereferencing fields that may not exist on the current table.
+  v_body := coalesce(
+    to_jsonb(new) ->> 'body_markdown',
+    to_jsonb(new) ->> 'description',
+    to_jsonb(new) ->> 'note',
+    ''
+  );
 
   update public.content_items
   set search_vector = setweight(to_tsvector('simple', coalesce(v_title, '')), 'A')
