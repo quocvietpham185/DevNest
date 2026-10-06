@@ -233,6 +233,12 @@ grant usage on schema public to anon, authenticated;
 grant select on public.content_items, public.profiles, public.tags,
   public.content_tags, public.posts, public.projects, public.repos,
   public.questions to anon, authenticated;
+grant insert, update, delete on public.content_items, public.content_tags,
+  public.posts, public.projects, public.repos, public.questions to authenticated;
+grant insert, update on public.profiles to authenticated;
+grant insert on public.tags to authenticated;
+grant insert, update, delete on public.likes, public.comments,
+  public.bookmarks, public.user_follows, public.tag_follows to authenticated;
 
 -- Public read on everything content-shaped; writes limited to the owner.
 create policy "profiles are publicly readable" on public.profiles for select using (true);
@@ -249,6 +255,8 @@ create policy "authors delete own content" on public.content_items for delete us
 create policy "content_tags are publicly readable" on public.content_tags for select using (true);
 create policy "authors tag own content" on public.content_tags for insert to authenticated
   with check (exists (select 1 from public.content_items c where c.id = content_id and c.author_id = auth.uid()));
+create policy "authors untag own content" on public.content_tags for delete to authenticated
+  using (exists (select 1 from public.content_items c where c.id = content_id and c.author_id = auth.uid()));
 
 create policy "posts are publicly readable" on public.posts for select using (true);
 create policy "authors write own posts" on public.posts for all

@@ -8,6 +8,7 @@ import { TagPill } from "../components/TagPill";
 import { ErrorState } from "../components/EmptyState";
 import { LikeButton } from "../components/LikeButton";
 import { BookmarkButton } from "../components/BookmarkButton";
+import { ContentOwnerActions } from "../components/ContentOwnerActions";
 
 const STATUS_LABEL: Record<string, string> = {
   open: "Chưa giải quyết",
@@ -56,6 +57,7 @@ export function QuestionDetail() {
             <TagPill key={tag} tag={tag} />
           ))}
         </div>
+        <div className="mt-3"><ContentOwnerActions item={item} editPath={`/question/${item.id}/edit`} afterDelete="/questions" /></div>
       </header>
 
       <div className="markdown-body text-[15px] dark:text-zinc-200">

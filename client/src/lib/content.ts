@@ -10,6 +10,7 @@ export interface Author {
 
 export interface FeedItem {
   id: string;
+  authorId: string;
   kind: ContentKind;
   title: string;
   createdAt: string;
@@ -24,6 +25,7 @@ export interface FeedItem {
   repoName: string | null;
   demoUrl: string | null;
   bodyMarkdown: string | null;
+  published: boolean | null;
 }
 
 const FEED_SELECT = `
@@ -47,6 +49,7 @@ function normalize(row: any): FeedItem {
 
   return {
     id: row.id,
+    authorId: row.author_id,
     kind: row.kind,
     title: row.title,
     createdAt: row.created_at,
@@ -64,6 +67,7 @@ function normalize(row: any): FeedItem {
     repoName: repo?.name ?? null,
     demoUrl: project?.demo_url ?? null,
     bodyMarkdown,
+    published: post?.published ?? null,
   };
 }
 
@@ -119,6 +123,12 @@ async function attachTags(contentId: string, tagNames: string[]) {
       .insert({ content_id: contentId, tag_id: tag.id });
     if (linkError) throw linkError;
   }
+}
+
+async function replaceTags(contentId: string, tagNames: string[]) {
+  const { error: deleteError } = await supabase.from("content_tags").delete().eq("content_id", contentId);
+  if (deleteError) throw deleteError;
+  await attachTags(contentId, tagNames);
 }
 
 async function createContentItem(authorId: string, kind: ContentKind, title: string) {
@@ -206,6 +216,91 @@ export async function createRepo(input: {
   });
   if (error) throw error;
   return id;
+}
+
+export async function updatePost(id: string, input: { title: string; bodyMarkdown: string; tags: string[]; published: boolean }) {
+  const { error: contentError } = await supabase.from("content_items").update({ title: input.title }).eq("id", id);
+  if (contentError) throw contentError;
+  const { error: postError } = await supabase
+    .from("posts")
+    .update({
+      body_markdown: input.bodyMarkdown,
+      published: input.published,
+      published_at: input.published ? new Date().toISOString() : null,
+    })
+    .eq("id", id);
+  if (postError) throw postError;
+  await replaceTags(id, input.tags);
+}
+
+export async function updateProject(
+  id: string,
+  input: {
+    title: string;
+    description: string;
+    status: "in_progress" | "completed" | "looking_for_collaborators";
+    repoUrl?: string;
+    demoUrl?: string;
+    tags: string[];
+  },
+) {
+  const { error: contentError } = await supabase.from("content_items").update({ title: input.title }).eq("id", id);
+  if (contentError) throw contentError;
+  const { error: projectError } = await supabase
+    .from("projects")
+    .upsert({
+      id,
+      description: input.description,
+      status: input.status,
+      repo_url: input.repoUrl || null,
+      demo_url: input.demoUrl || null,
+    })
+    .eq("id", id);
+  if (projectError) throw projectError;
+  await replaceTags(id, input.tags);
+}
+
+export async function updateQuestion(id: string, input: { title: string; bodyMarkdown: string; tags: string[] }) {
+  const { error: contentError } = await supabase.from("content_items").update({ title: input.title }).eq("id", id);
+  if (contentError) throw contentError;
+  const { error: questionError } = await supabase.from("questions").update({ body_markdown: input.bodyMarkdown }).eq("id", id);
+  if (questionError) throw questionError;
+  await replaceTags(id, input.tags);
+}
+
+export async function updateRepo(
+  id: string,
+  input: {
+    title: string;
+    githubUrl: string;
+    owner: string;
+    name: string;
+    description?: string;
+    stars?: number;
+    primaryLanguage?: string;
+    note: string;
+  },
+) {
+  const { error: contentError } = await supabase.from("content_items").update({ title: input.title }).eq("id", id);
+  if (contentError) throw contentError;
+  const { error: repoError } = await supabase
+    .from("repos")
+    .update({
+      github_url: input.githubUrl,
+      owner: input.owner,
+      name: input.name,
+      description: input.description || null,
+      stars: input.stars ?? 0,
+      primary_language: input.primaryLanguage || null,
+      note: input.note,
+    })
+    .eq("id", id);
+  if (repoError) throw repoError;
+}
+
+export async function deleteContent(id: string) {
+  const { error } = await supabase.from("content_items").delete().eq("id", id);
+  if (error) throw error;
 }
 
 export interface CommentRow {

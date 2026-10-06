@@ -46,6 +46,7 @@ function normalizeContentItem(row: any): FeedItem {
 
   return {
     id: row.id,
+    authorId: row.author_id,
     kind: row.kind,
     title: row.title,
     createdAt: row.created_at,
@@ -63,6 +64,7 @@ function normalizeContentItem(row: any): FeedItem {
     repoName: repo?.name ?? null,
     demoUrl: project?.demo_url ?? null,
     bodyMarkdown,
+    published: post?.published ?? null,
   };
 }
 

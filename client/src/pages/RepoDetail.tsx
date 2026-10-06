@@ -5,6 +5,7 @@ import { LikeButton } from "../components/LikeButton";
 import { BookmarkButton } from "../components/BookmarkButton";
 import { CommentSection } from "../components/CommentSection";
 import { ErrorState } from "../components/EmptyState";
+import { ContentOwnerActions } from "../components/ContentOwnerActions";
 
 export function RepoDetail() {
   const { id } = useParams<{ id: string }>();
@@ -34,6 +35,7 @@ export function RepoDetail() {
           )}
           {typeof item.stars === "number" && <span>★ {item.stars}</span>}
         </div>
+        <div className="mt-3"><ContentOwnerActions item={item} editPath={`/repo/${item.id}/edit`} afterDelete="/repos" /></div>
       </header>
 
       {item.excerpt && <p className="text-[15px] text-zinc-600 dark:text-zinc-400">{item.excerpt}</p>}

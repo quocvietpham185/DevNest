@@ -12,6 +12,7 @@ import { QuestionDetail } from "./pages/QuestionDetail";
 import { ShareRepo } from "./pages/ShareRepo";
 import { RepoList } from "./pages/RepoList";
 import { RepoDetail } from "./pages/RepoDetail";
+import { EditContent } from "./pages/EditContent";
 import { Profile } from "./pages/Profile";
 import { EditProfile } from "./pages/EditProfile";
 import { Search } from "./pages/Search";
@@ -35,6 +36,10 @@ export function App() {
           <Route path="/share-repo" element={<ShareRepo />} />
           <Route path="/repos" element={<RepoList />} />
           <Route path="/repos/:id" element={<RepoDetail />} />
+          <Route path="/post/:id/edit" element={<EditContent />} />
+          <Route path="/project/:id/edit" element={<EditContent />} />
+          <Route path="/question/:id/edit" element={<EditContent />} />
+          <Route path="/repo/:id/edit" element={<EditContent />} />
           <Route path="/u/:username" element={<Profile />} />
           <Route path="/settings/profile" element={<EditProfile />} />
           <Route path="/search" element={<Search />} />

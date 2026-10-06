@@ -6,6 +6,7 @@ import { BookmarkButton } from "../components/BookmarkButton";
 import { CommentSection } from "../components/CommentSection";
 import { TagPill } from "../components/TagPill";
 import { ErrorState } from "../components/EmptyState";
+import { ContentOwnerActions } from "../components/ContentOwnerActions";
 
 const STATUS_LABEL: Record<string, string> = {
   in_progress: "Đang phát triển",
@@ -45,6 +46,7 @@ export function ProjectDetail() {
             <TagPill key={tag} tag={tag} />
           ))}
         </div>
+        <div className="mt-3"><ContentOwnerActions item={item} editPath={`/project/${item.id}/edit`} afterDelete="/" /></div>
       </header>
 
       <p className="whitespace-pre-wrap text-[15px] text-zinc-700 dark:text-zinc-300">{item.excerpt}</p>

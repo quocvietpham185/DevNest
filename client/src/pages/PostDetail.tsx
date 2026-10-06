@@ -8,6 +8,7 @@ import { BookmarkButton } from "../components/BookmarkButton";
 import { CommentSection } from "../components/CommentSection";
 import { TagPill } from "../components/TagPill";
 import { ErrorState } from "../components/EmptyState";
+import { ContentOwnerActions } from "../components/ContentOwnerActions";
 
 export function PostDetail() {
   const { id } = useParams<{ id: string }>();
@@ -34,6 +35,7 @@ export function PostDetail() {
             <TagPill key={tag} tag={tag} />
           ))}
         </div>
+        <div className="mt-3"><ContentOwnerActions item={item} editPath={`/post/${item.id}/edit`} afterDelete="/" /></div>
       </header>
 
       <div className="markdown-body text-[15px] dark:text-zinc-200">
