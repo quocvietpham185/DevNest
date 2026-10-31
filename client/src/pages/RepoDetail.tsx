@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { fetchContentById, type FeedItem } from "../lib/content";
 import { LikeButton } from "../components/LikeButton";
 import { BookmarkButton } from "../components/BookmarkButton";
+import { ReportButton } from "../components/ReportButton";
 import { CommentSection } from "../components/CommentSection";
 import { ErrorState } from "../components/EmptyState";
 import { ContentOwnerActions } from "../components/ContentOwnerActions";
@@ -65,6 +66,7 @@ export function RepoDetail() {
       <div className="flex items-center gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">
         <LikeButton contentId={item.id} />
         <BookmarkButton contentId={item.id} />
+        <ReportButton contentId={item.id} authorId={item.authorId} />
       </div>
 
       <CommentSection contentId={item.id} />

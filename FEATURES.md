@@ -67,7 +67,9 @@
 - [ ] Trang kết quả tìm kiếm có filter theo loại nội dung
 
 ### Vận hành
-- [ ] Report / flag nội dung
+- [x] Report / flag nội dung (nút "Báo cáo" trên trang chi tiết → bảng `reports`)
+- [x] Trang quản trị `/admin` (chỉ admin): tổng quan số liệu, hàng đợi báo cáo (xóa nội dung / đã xử lý / bỏ qua), danh sách & xóa nội dung, quản lý người dùng (cấp/gỡ admin)
+- [ ] Ban / khóa tài khoản vi phạm (chưa làm)
 - [ ] Sitemap.xml + metadata/OpenGraph động
 - [ ] Logging request/error cơ bản
 

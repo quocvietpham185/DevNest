@@ -20,6 +20,9 @@ create table public.profiles (
   github_username text,
   avatar_url text,
   bio text,
+  -- Changed only through public.set_user_role(); column-level grants below
+  -- stop users from updating it on their own row.
+  role text not null default 'user' check (role in ('user', 'admin')),
   created_at timestamptz not null default now()
 );
 
@@ -213,6 +216,58 @@ create table public.tag_follows (
 );
 
 -- ---------------------------------------------------------------------------
+-- Moderation: reports + admin helpers
+-- ---------------------------------------------------------------------------
+-- A report row is removed together with its content (on delete cascade), so
+-- "delete content" from the admin queue also clears that content's reports.
+create table public.reports (
+  id uuid primary key default gen_random_uuid(),
+  content_id uuid not null references public.content_items (id) on delete cascade,
+  reporter_id uuid not null references public.profiles (id) on delete cascade,
+  reason text not null check (char_length(reason) between 3 and 500),
+  status text not null default 'open' check (status in ('open', 'resolved', 'dismissed')),
+  created_at timestamptz not null default now(),
+  unique (content_id, reporter_id)
+);
+
+create index reports_status_idx on public.reports (status, created_at desc);
+
+create function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from public.profiles where id = auth.uid() and role = 'admin');
+$$;
+
+-- Only an admin may change roles, and never their own (avoids removing the last admin).
+create function public.set_user_role(target_user uuid, new_role text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Only admins can change roles';
+  end if;
+  if target_user = auth.uid() then
+    raise exception 'You cannot change your own role';
+  end if;
+  if new_role not in ('user', 'admin') then
+    raise exception 'Invalid role';
+  end if;
+  update public.profiles set role = new_role where id = target_user;
+end;
+$$;
+
+revoke all on function public.set_user_role(uuid, text) from public, anon;
+grant execute on function public.set_user_role(uuid, text) to authenticated;
+grant execute on function public.is_admin() to authenticated;
+
+-- ---------------------------------------------------------------------------
 -- Row Level Security
 -- ---------------------------------------------------------------------------
 alter table public.profiles enable row level security;
@@ -228,6 +283,7 @@ alter table public.comments enable row level security;
 alter table public.bookmarks enable row level security;
 alter table public.user_follows enable row level security;
 alter table public.tag_follows enable row level security;
+alter table public.reports enable row level security;
 
 grant usage on schema public to anon, authenticated;
 grant select on public.content_items, public.profiles, public.tags,
@@ -235,10 +291,18 @@ grant select on public.content_items, public.profiles, public.tags,
   public.questions to anon, authenticated;
 grant insert, update, delete on public.content_items, public.content_tags,
   public.posts, public.projects, public.repos, public.questions to authenticated;
-grant insert, update on public.profiles to authenticated;
+-- Column-level update grant: `role` is deliberately absent so a user cannot
+-- promote themselves to admin through the "users update own profile" policy.
+grant insert on public.profiles to authenticated;
+grant update (username, github_username, avatar_url, bio) on public.profiles to authenticated;
 grant insert on public.tags to authenticated;
+grant select on public.likes, public.comments, public.user_follows,
+  public.tag_follows to anon, authenticated;
+grant select on public.bookmarks to authenticated;
 grant insert, update, delete on public.likes, public.comments,
   public.bookmarks, public.user_follows, public.tag_follows to authenticated;
+grant select, insert on public.reports to authenticated;
+grant update (status) on public.reports to authenticated;
 
 -- Public read on everything content-shaped; writes limited to the owner.
 create policy "profiles are publicly readable" on public.profiles for select using (true);
@@ -283,6 +347,14 @@ create policy "authors manage own comments" on public.comments for update using 
 create policy "question owners mark accepted answer" on public.comments for update
   using (exists (select 1 from public.content_items c where c.id = content_id and c.author_id = auth.uid()));
 create policy "authors delete own comments" on public.comments for delete using (auth.uid() = author_id);
+
+create policy "admins delete any content" on public.content_items for delete to authenticated using (public.is_admin());
+create policy "admins delete any comment" on public.comments for delete to authenticated using (public.is_admin());
+
+create policy "users file reports as themselves" on public.reports for insert to authenticated
+  with check (auth.uid() = reporter_id);
+create policy "admins read reports" on public.reports for select to authenticated using (public.is_admin());
+create policy "admins update reports" on public.reports for update to authenticated using (public.is_admin());
 
 create policy "users see own bookmarks" on public.bookmarks for select using (auth.uid() = user_id);
 create policy "users manage own bookmarks" on public.bookmarks for all using (auth.uid() = user_id);

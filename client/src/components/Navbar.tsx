@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
+import { useIsAdmin } from "../hooks/useIsAdmin";
 import { supabase } from "../lib/supabaseClient";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -17,6 +18,7 @@ const NEW_LINKS = [
 
 export function Navbar() {
   const { session, loading } = useSession();
+  const { isAdmin } = useIsAdmin();
   const [query, setQuery] = useState("");
   const [newMenuOpen, setNewMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -43,6 +45,11 @@ export function Navbar() {
           <NavLink to="/repos" className={navLinkClass}>
             Repos
           </NavLink>
+          {isAdmin && (
+            <NavLink to="/admin" className={navLinkClass}>
+              Quản trị
+            </NavLink>
+          )}
         </nav>
 
         <form onSubmit={handleSearch} className="ml-auto min-w-0 flex-1 max-w-xs">

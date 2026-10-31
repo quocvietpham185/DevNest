@@ -16,6 +16,7 @@ import { EditContent } from "./pages/EditContent";
 import { Profile } from "./pages/Profile";
 import { EditProfile } from "./pages/EditProfile";
 import { Search } from "./pages/Search";
+import { Admin } from "./pages/Admin";
 import { NotFound } from "./pages/NotFound";
 
 export function App() {
@@ -43,6 +44,7 @@ export function App() {
           <Route path="/u/:username" element={<Profile />} />
           <Route path="/settings/profile" element={<EditProfile />} />
           <Route path="/search" element={<Search />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
