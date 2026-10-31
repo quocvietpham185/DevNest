@@ -23,6 +23,10 @@ create table public.profiles (
   -- Changed only through public.set_user_role(); column-level grants below
   -- stop users from updating it on their own row.
   role text not null default 'user' check (role in ('user', 'admin')),
+  -- Set only through public.set_user_banned(); a banned user keeps read access
+  -- but every write policy below requires `not public.is_banned()`.
+  is_banned boolean not null default false,
+  banned_reason text,
   created_at timestamptz not null default now()
 );
 
@@ -267,6 +271,44 @@ revoke all on function public.set_user_role(uuid, text) from public, anon;
 grant execute on function public.set_user_role(uuid, text) to authenticated;
 grant execute on function public.is_admin() to authenticated;
 
+create function public.is_banned()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce((select is_banned from public.profiles where id = auth.uid()), false);
+$$;
+
+-- Admins only; cannot ban yourself or another admin (demote them first).
+create function public.set_user_banned(target_user uuid, banned boolean, reason text default null)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Only admins can ban users';
+  end if;
+  if target_user = auth.uid() then
+    raise exception 'You cannot ban yourself';
+  end if;
+  if exists (select 1 from public.profiles where id = target_user and role = 'admin') then
+    raise exception 'Demote this admin before banning';
+  end if;
+  update public.profiles
+  set is_banned = banned,
+      banned_reason = case when banned then nullif(trim(reason), '') else null end
+  where id = target_user;
+end;
+$$;
+
+revoke all on function public.set_user_banned(uuid, boolean, text) from public, anon;
+grant execute on function public.set_user_banned(uuid, boolean, text) to authenticated;
+grant execute on function public.is_banned() to authenticated;
+
 -- ---------------------------------------------------------------------------
 -- Row Level Security
 -- ---------------------------------------------------------------------------
@@ -312,38 +354,38 @@ create policy "tags are publicly readable" on public.tags for select using (true
 create policy "authenticated users create tags" on public.tags for insert to authenticated with check (true);
 
 create policy "content is publicly readable" on public.content_items for select using (true);
-create policy "authors create own content" on public.content_items for insert to authenticated with check (auth.uid() = author_id);
-create policy "authors update own content" on public.content_items for update using (auth.uid() = author_id);
+create policy "authors create own content" on public.content_items for insert to authenticated with check (auth.uid() = author_id and not public.is_banned());
+create policy "authors update own content" on public.content_items for update using (auth.uid() = author_id and not public.is_banned());
 create policy "authors delete own content" on public.content_items for delete using (auth.uid() = author_id);
 
 create policy "content_tags are publicly readable" on public.content_tags for select using (true);
 create policy "authors tag own content" on public.content_tags for insert to authenticated
-  with check (exists (select 1 from public.content_items c where c.id = content_id and c.author_id = auth.uid()));
+  with check (exists (select 1 from public.content_items c where c.id = content_id and c.author_id = auth.uid()) and not public.is_banned());
 create policy "authors untag own content" on public.content_tags for delete to authenticated
   using (exists (select 1 from public.content_items c where c.id = content_id and c.author_id = auth.uid()));
 
 create policy "posts are publicly readable" on public.posts for select using (true);
 create policy "authors write own posts" on public.posts for all
-  using (exists (select 1 from public.content_items c where c.id = id and c.author_id = auth.uid()));
+  using (exists (select 1 from public.content_items c where c.id = id and c.author_id = auth.uid()) and not public.is_banned());
 
 create policy "projects are publicly readable" on public.projects for select using (true);
 create policy "authors write own projects" on public.projects for all
-  using (exists (select 1 from public.content_items c where c.id = id and c.author_id = auth.uid()));
+  using (exists (select 1 from public.content_items c where c.id = id and c.author_id = auth.uid()) and not public.is_banned());
 
 create policy "repos are publicly readable" on public.repos for select using (true);
 create policy "authors write own repos" on public.repos for all
-  using (exists (select 1 from public.content_items c where c.id = id and c.author_id = auth.uid()));
+  using (exists (select 1 from public.content_items c where c.id = id and c.author_id = auth.uid()) and not public.is_banned());
 
 create policy "questions are publicly readable" on public.questions for select using (true);
 create policy "authors write own questions" on public.questions for all
-  using (exists (select 1 from public.content_items c where c.id = id and c.author_id = auth.uid()));
+  using (exists (select 1 from public.content_items c where c.id = id and c.author_id = auth.uid()) and not public.is_banned());
 
 create policy "likes are publicly readable" on public.likes for select using (true);
 create policy "users manage own likes" on public.likes for all using (auth.uid() = user_id);
 
 create policy "comments are publicly readable" on public.comments for select using (true);
-create policy "authenticated users create comments" on public.comments for insert to authenticated with check (auth.uid() = author_id);
-create policy "authors manage own comments" on public.comments for update using (auth.uid() = author_id);
+create policy "authenticated users create comments" on public.comments for insert to authenticated with check (auth.uid() = author_id and not public.is_banned());
+create policy "authors manage own comments" on public.comments for update using (auth.uid() = author_id and not public.is_banned());
 create policy "question owners mark accepted answer" on public.comments for update
   using (exists (select 1 from public.content_items c where c.id = content_id and c.author_id = auth.uid()));
 create policy "authors delete own comments" on public.comments for delete using (auth.uid() = author_id);
@@ -352,7 +394,7 @@ create policy "admins delete any content" on public.content_items for delete to 
 create policy "admins delete any comment" on public.comments for delete to authenticated using (public.is_admin());
 
 create policy "users file reports as themselves" on public.reports for insert to authenticated
-  with check (auth.uid() = reporter_id);
+  with check (auth.uid() = reporter_id and not public.is_banned());
 create policy "admins read reports" on public.reports for select to authenticated using (public.is_admin());
 create policy "admins update reports" on public.reports for update to authenticated using (public.is_admin());
 

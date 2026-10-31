@@ -6,6 +6,7 @@ import {
   fetchReports,
   fetchUsers,
   setReportStatus,
+  setUserBanned,
   setUserRole,
   type AdminStats,
   type AdminUser,
@@ -13,7 +14,7 @@ import {
   type ReportStatus,
 } from "../lib/admin";
 import { fetchFeed, type ContentKind, type FeedItem } from "../lib/content";
-import { useIsAdmin } from "../hooks/useIsAdmin";
+import { useAccountStatus } from "../hooks/useAccountStatus";
 import { useSession } from "../hooks/useSession";
 import { EmptyState, ErrorState } from "../components/EmptyState";
 
@@ -328,6 +329,27 @@ function Users() {
     }
   }
 
+  async function toggleBan(user: AdminUser) {
+    let reason: string | undefined;
+    if (!user.isBanned) {
+      const input = window.prompt(`Lý do khóa @${user.username}? (hiển thị cho người bị khóa)`);
+      if (input === null) return;
+      reason = input;
+    } else if (!window.confirm(`Mở khóa @${user.username}?`)) {
+      return;
+    }
+    setBusyId(user.id);
+    setActionError(null);
+    try {
+      await setUserBanned(user.id, !user.isBanned, reason);
+      reload();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Không đổi được trạng thái khóa");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <form
@@ -367,11 +389,30 @@ function Users() {
               >
                 {u.role === "admin" ? "Admin" : "Thành viên"}
               </span>
+              {u.isBanned && (
+                <span
+                  title={u.bannedReason ?? undefined}
+                  className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-950 dark:text-red-300"
+                >
+                  Bị khóa
+                </span>
+              )}
               <span className="text-xs text-zinc-500">{dateFmt.format(new Date(u.createdAt))}</span>
               {u.id !== session?.user.id && (
-                <button disabled={busyId === u.id} onClick={() => toggleRole(u)} className={smallBtn}>
-                  {u.role === "admin" ? "Gỡ admin" : "Cấp admin"}
-                </button>
+                <>
+                  <button disabled={busyId === u.id} onClick={() => toggleRole(u)} className={smallBtn}>
+                    {u.role === "admin" ? "Gỡ admin" : "Cấp admin"}
+                  </button>
+                  {u.role !== "admin" && (
+                    <button
+                      disabled={busyId === u.id}
+                      onClick={() => toggleBan(u)}
+                      className={u.isBanned ? smallBtn : dangerBtn}
+                    >
+                      {u.isBanned ? "Mở khóa" : "Khóa"}
+                    </button>
+                  )}
+                </>
               )}
             </li>
           ))}
@@ -383,7 +424,7 @@ function Users() {
 
 export function Admin() {
   const { session, loading: sessionLoading } = useSession();
-  const { isAdmin, loading } = useIsAdmin();
+  const { isAdmin, loading } = useAccountStatus();
   const [tab, setTab] = useState<Tab>("overview");
 
   if (sessionLoading || loading) return <p className="text-sm text-zinc-500">Đang kiểm tra quyền...</p>;

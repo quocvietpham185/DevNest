@@ -46,6 +46,7 @@ npm install
 2. Bật GitHub làm OAuth provider: **Authentication → Providers → GitHub**.
 3. Áp schema: mở **SQL Editor**, dán nội dung [`supabase/schema.sql`](./supabase/schema.sql) và chạy — hoặc `npx supabase db push` nếu dùng Supabase CLI.
    - **Tạo admin đầu tiên**: đăng ký một tài khoản bình thường trên app, rồi chạy trong SQL Editor `update public.profiles set role = 'admin' where username = '<username của bạn>';`. Sau đó admin này cấp/gỡ quyền cho người khác ngay trong trang `/admin` → Người dùng. Cột `role` không thể tự sửa từ client (đã chặn bằng column-level grant).
+   - DB đã tạo từ schema cũ: chạy thêm [`supabase/migrations/ban_accounts.sql`](./supabase/migrations/ban_accounts.sql) (cần có sẵn phần admin) để bật tính năng khóa tài khoản.
 4. Copy `client/.env.example` → `client/.env.local`, điền `VITE_SUPABASE_URL` và `VITE_SUPABASE_ANON_KEY` từ **Project Settings → API**.
 5. Copy `server/.env.example` → `server/.env`. (Tuỳ chọn) thêm `GITHUB_TOKEN` (personal access token) để nâng rate limit khi fetch metadata repo — xem PRD.md mục 6.
 

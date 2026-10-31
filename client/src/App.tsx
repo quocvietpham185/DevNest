@@ -17,12 +17,20 @@ import { Profile } from "./pages/Profile";
 import { EditProfile } from "./pages/EditProfile";
 import { Search } from "./pages/Search";
 import { Admin } from "./pages/Admin";
+import { useAccountStatus } from "./hooks/useAccountStatus";
 import { NotFound } from "./pages/NotFound";
 
 export function App() {
+  const { isBanned, bannedReason } = useAccountStatus();
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
       <Navbar />
+      {isBanned && (
+        <div role="alert" className="bg-red-50 px-6 py-3 text-center text-sm text-red-800 dark:bg-red-950/40 dark:text-red-200">
+          Tài khoản của bạn đã bị khóa nên không thể đăng bài, bình luận hay báo cáo.
+          {bannedReason && <> Lý do: {bannedReason}</>}
+        </div>
+      )}
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-8">
         <Routes>
           <Route path="/" element={<Home />} />

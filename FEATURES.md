@@ -69,7 +69,7 @@
 ### Vận hành
 - [x] Report / flag nội dung (nút "Báo cáo" trên trang chi tiết → bảng `reports`)
 - [x] Trang quản trị `/admin` (chỉ admin): tổng quan số liệu, hàng đợi báo cáo (xóa nội dung / đã xử lý / bỏ qua), danh sách & xóa nội dung, quản lý người dùng (cấp/gỡ admin)
-- [ ] Ban / khóa tài khoản vi phạm (chưa làm)
+- [x] Ban / khóa tài khoản: admin khóa kèm lý do, người bị khóa chỉ đọc được (chặn đăng bài, sửa bài, bình luận, báo cáo bằng RLS) và thấy banner thông báo; admin không thể bị khóa trực tiếp. Chưa chặn like/bookmark/follow
 - [ ] Sitemap.xml + metadata/OpenGraph động
 - [ ] Logging request/error cơ bản
 

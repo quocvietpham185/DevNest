@@ -3,10 +3,24 @@ import { deleteContent, type ContentKind } from "./content";
 
 export { deleteContent };
 
-export async function fetchIsAdmin(userId: string) {
-  const { data, error } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
+export interface AccountStatus {
+  isAdmin: boolean;
+  isBanned: boolean;
+  bannedReason: string | null;
+}
+
+export async function fetchAccountStatus(userId: string): Promise<AccountStatus> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("role, is_banned, banned_reason")
+    .eq("id", userId)
+    .maybeSingle();
   if (error) throw error;
-  return data?.role === "admin";
+  return {
+    isAdmin: data?.role === "admin",
+    isBanned: data?.is_banned ?? false,
+    bannedReason: data?.banned_reason ?? null,
+  };
 }
 
 export interface AdminStats {
@@ -88,13 +102,15 @@ export interface AdminUser {
   id: string;
   username: string;
   role: "user" | "admin";
+  isBanned: boolean;
+  bannedReason: string | null;
   createdAt: string;
 }
 
 export async function fetchUsers(search = ""): Promise<AdminUser[]> {
   let query = supabase
     .from("profiles")
-    .select("id, username, role, created_at")
+    .select("id, username, role, is_banned, banned_reason, created_at")
     .order("created_at", { ascending: false })
     .limit(100);
   if (search.trim()) query = query.ilike("username", `%${search.trim()}%`);
@@ -102,11 +118,27 @@ export async function fetchUsers(search = ""): Promise<AdminUser[]> {
   const { data, error } = await query;
   if (error) throw error;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data ?? []).map((u: any) => ({ id: u.id, username: u.username, role: u.role, createdAt: u.created_at }));
+  return (data ?? []).map((u: any) => ({
+    id: u.id,
+    username: u.username,
+    role: u.role,
+    isBanned: u.is_banned,
+    bannedReason: u.banned_reason,
+    createdAt: u.created_at,
+  }));
 }
 
 export async function setUserRole(userId: string, role: "user" | "admin") {
   const { error } = await supabase.rpc("set_user_role", { target_user: userId, new_role: role });
+  if (error) throw error;
+}
+
+export async function setUserBanned(userId: string, banned: boolean, reason?: string) {
+  const { error } = await supabase.rpc("set_user_banned", {
+    target_user: userId,
+    banned,
+    reason: reason ?? null,
+  });
   if (error) throw error;
 }
 
