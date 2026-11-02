@@ -8,6 +8,7 @@ import { CommentSection } from "../components/CommentSection";
 import { TagPill } from "../components/TagPill";
 import { ErrorState } from "../components/EmptyState";
 import { ContentOwnerActions } from "../components/ContentOwnerActions";
+import { setPageMetadata } from "../lib/seo";
 
 const STATUS_LABEL: Record<string, string> = {
   in_progress: "Đang phát triển",
@@ -26,6 +27,10 @@ export function ProjectDetail() {
       .then(setItem)
       .catch((err) => setError(err instanceof Error ? err.message : "Không tìm thấy project"));
   }, [id]);
+
+  useEffect(() => {
+    if (item) setPageMetadata(item.title, item.excerpt ?? undefined);
+  }, [item]);
 
   if (error) return <ErrorState message={error} />;
   if (!item) return <p className="text-sm text-zinc-500 dark:text-zinc-400">Đang tải...</p>;

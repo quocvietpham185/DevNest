@@ -5,21 +5,41 @@ import { ContentCard } from "../components/ContentCard";
 import { EmptyState, ErrorState } from "../components/EmptyState";
 import { FollowTagButton } from "../components/FollowTagButton";
 
+const PAGE_SIZE = 20;
+
 export function Home() {
   const [params, setParams] = useSearchParams();
   const tag = params.get("tag") ?? undefined;
   const [items, setItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetchFeed({ tag })
-      .then(setItems)
+    fetchFeed({ tag, limit: PAGE_SIZE, offset: 0 })
+      .then((page) => {
+        setItems(page);
+        setHasMore(page.length === PAGE_SIZE);
+      })
       .catch((err) => setError(err instanceof Error ? err.message : "Không tải được feed"))
       .finally(() => setLoading(false));
   }, [tag]);
+
+  async function loadMore() {
+    setLoadingMore(true);
+    try {
+      const page = await fetchFeed({ tag, limit: PAGE_SIZE, offset: items.length });
+      setItems((current) => [...current, ...page]);
+      setHasMore(page.length === PAGE_SIZE);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Không tải thêm được feed");
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -45,6 +65,16 @@ export function Home() {
             <ContentCard key={item.id} item={item} />
           ))}
         </ul>
+      )}
+      {!loading && !error && items.length > 0 && hasMore && (
+        <button
+          type="button"
+          onClick={loadMore}
+          disabled={loadingMore}
+          className="self-center rounded-full border border-zinc-300 px-5 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+        >
+          {loadingMore ? "Đang tải..." : "Tải thêm"}
+        </button>
       )}
     </div>
   );

@@ -65,6 +65,7 @@ function normalizeContentItem(row: any): FeedItem {
     demoUrl: project?.demo_url ?? null,
     bodyMarkdown,
     published: post?.published ?? null,
+    answerCount: null,
   };
 }
 

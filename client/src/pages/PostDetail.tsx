@@ -10,6 +10,7 @@ import { CommentSection } from "../components/CommentSection";
 import { TagPill } from "../components/TagPill";
 import { ErrorState } from "../components/EmptyState";
 import { ContentOwnerActions } from "../components/ContentOwnerActions";
+import { setPageMetadata } from "../lib/seo";
 
 export function PostDetail() {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +23,10 @@ export function PostDetail() {
       .then(setItem)
       .catch((err) => setError(err instanceof Error ? err.message : "Không tìm thấy bài viết"));
   }, [id]);
+
+  useEffect(() => {
+    if (item) setPageMetadata(item.title, item.excerpt ?? undefined);
+  }, [item]);
 
   if (error) return <ErrorState message={error} />;
   if (!item) return <p className="text-sm text-zinc-500 dark:text-zinc-400">Đang tải...</p>;
@@ -40,6 +45,11 @@ export function PostDetail() {
       </header>
 
       <div className="markdown-body text-[15px] dark:text-zinc-200">
+        {item.bodyMarkdown && (
+          <p className="mb-4 text-xs text-zinc-400">
+            Thời gian đọc khoảng {Math.max(1, Math.ceil(item.bodyMarkdown.trim().split(/\s+/).length / 200))} phút
+          </p>
+        )}
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.bodyMarkdown ?? ""}</ReactMarkdown>
       </div>
 

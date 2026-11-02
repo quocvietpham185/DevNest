@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchFeed, type FeedItem } from "../lib/content";
 import { ContentCard } from "../components/ContentCard";
 import { EmptyState, ErrorState } from "../components/EmptyState";
 
 export function QuestionList() {
+  const [sort, setSort] = useState<"newest" | "answers">("newest");
   const [items, setItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,6 +16,14 @@ export function QuestionList() {
       .catch((err) => setError(err instanceof Error ? err.message : "Không tải được câu hỏi"))
       .finally(() => setLoading(false));
   }, []);
+
+  const sortedItems = useMemo(
+    () =>
+      sort === "answers"
+        ? [...items].sort((a, b) => (b.answerCount ?? 0) - (a.answerCount ?? 0))
+        : items,
+    [items, sort],
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -27,6 +36,22 @@ export function QuestionList() {
           Đặt câu hỏi
         </Link>
       </div>
+      <div className="flex gap-2 text-sm">
+        <button
+          type="button"
+          onClick={() => setSort("newest")}
+          className={sort === "newest" ? "font-medium text-accent-600" : "text-zinc-500"}
+        >
+          Mới nhất
+        </button>
+        <button
+          type="button"
+          onClick={() => setSort("answers")}
+          className={sort === "answers" ? "font-medium text-accent-600" : "text-zinc-500"}
+        >
+          Nhiều câu trả lời
+        </button>
+      </div>
 
       {loading ? (
         <p className="text-sm text-zinc-500 dark:text-zinc-400">Đang tải...</p>
@@ -36,7 +61,7 @@ export function QuestionList() {
         <EmptyState title="Chưa có câu hỏi nào" hint="Đặt câu hỏi đầu tiên cho cộng đồng!" />
       ) : (
         <ul className="flex flex-col gap-4">
-          {items.map((item) => (
+          {sortedItems.map((item) => (
             <ContentCard key={item.id} item={item} />
           ))}
         </ul>

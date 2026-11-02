@@ -10,6 +10,7 @@ import { LikeButton } from "../components/LikeButton";
 import { BookmarkButton } from "../components/BookmarkButton";
 import { ReportButton } from "../components/ReportButton";
 import { ContentOwnerActions } from "../components/ContentOwnerActions";
+import { setPageMetadata } from "../lib/seo";
 
 const STATUS_LABEL: Record<string, string> = {
   open: "Chưa giải quyết",
@@ -31,6 +32,10 @@ export function QuestionDetail() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (item) setPageMetadata(item.title, item.excerpt ?? undefined);
+  }, [item]);
 
   if (error) return <ErrorState message={error} />;
   if (!item) return <p className="text-sm text-zinc-500 dark:text-zinc-400">Đang tải...</p>;

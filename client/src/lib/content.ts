@@ -26,6 +26,7 @@ export interface FeedItem {
   demoUrl: string | null;
   bodyMarkdown: string | null;
   published: boolean | null;
+  answerCount: number | null;
 }
 
 const FEED_SELECT = `
@@ -35,7 +36,8 @@ const FEED_SELECT = `
   posts ( body_markdown, published ),
   projects ( description, status, repo_url, demo_url ),
   repos ( description, stars, primary_language, github_url, owner, name, note ),
-  questions ( body_markdown, status )
+  questions ( body_markdown, status ),
+  comments ( count )
 `;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,6 +46,7 @@ function normalize(row: any): FeedItem {
   const project = row.projects ?? null;
   const repo = row.repos ?? null;
   const question = row.questions ?? null;
+  const answerCount = Array.isArray(row.comments) ? row.comments[0]?.count ?? 0 : null;
 
   const bodyMarkdown = post?.body_markdown ?? project?.description ?? repo?.note ?? question?.body_markdown ?? null;
 
@@ -68,6 +71,7 @@ function normalize(row: any): FeedItem {
     demoUrl: project?.demo_url ?? null,
     bodyMarkdown,
     published: post?.published ?? null,
+    answerCount,
   };
 }
 
@@ -94,13 +98,16 @@ export async function fetchContentById(id: string): Promise<FeedItem> {
   return normalize(data);
 }
 
-export async function searchContent(q: string, limit = 20) {
-  const { data, error } = await supabase
+export async function searchContent(q: string, opts: { kind?: ContentKind; limit?: number } = {}) {
+  const { kind, limit = 20 } = opts;
+  let query = supabase
     .from("content_items")
     .select(FEED_SELECT)
     .ilike("title", `%${q}%`)
     .order("created_at", { ascending: false })
     .limit(limit);
+  if (kind) query = query.eq("kind", kind);
+  const { data, error } = await query;
   if (error) throw error;
   return (data ?? []).map(normalize);
 }

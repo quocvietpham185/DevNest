@@ -41,7 +41,7 @@
 - [x] Trả lời câu hỏi (comment gắn vào câu hỏi)
 - [x] Người hỏi đánh dấu 1 câu trả lời là "Best answer"
 - [x] Trạng thái câu hỏi: Chưa giải quyết / Đã giải quyết
-- [ ] Sắp xếp: mới nhất / nhiều câu trả lời nhất (hiện chỉ có mới nhất)
+- [x] Sắp xếp: mới nhất / nhiều câu trả lời nhất
 
 ### Repo Share (đơn giản hoá)
 - [x] Dán link GitHub repo, tự nhập title/mô tả/ghi chú cá nhân
@@ -52,7 +52,7 @@
 - [x] Trang chủ dạng feed: Mới nhất
 - [x] Lọc feed theo tag
 - [x] Feed phân biệt rõ 4 loại nội dung (blog/project/Q&A/repo)
-- [ ] Pagination / infinite scroll (hiện fetch cố định 20 item đầu)
+- [x] Pagination / tải thêm (feed tải theo từng trang 20 item)
 - [x] Empty state & error state
 
 ### Tương tác xã hội
@@ -64,14 +64,14 @@
 
 ### Tìm kiếm
 - [x] Tìm kiếm theo tên (hiện dùng `ilike` đơn giản, chưa nâng cấp lên `tsvector` full-text) trên cả 4 loại nội dung
-- [ ] Trang kết quả tìm kiếm có filter theo loại nội dung
+- [x] Trang kết quả tìm kiếm có filter theo loại nội dung
 
 ### Vận hành
 - [x] Report / flag nội dung (nút "Báo cáo" trên trang chi tiết → bảng `reports`)
 - [x] Trang quản trị `/admin` (chỉ admin): tổng quan số liệu, hàng đợi báo cáo (xóa nội dung / đã xử lý / bỏ qua), danh sách & xóa nội dung, quản lý người dùng (cấp/gỡ admin)
 - [x] Ban / khóa tài khoản: admin khóa kèm lý do, người bị khóa chỉ đọc được (chặn đăng bài, sửa bài, bình luận, báo cáo bằng RLS) và thấy banner thông báo; admin không thể bị khóa trực tiếp. Chưa chặn like/bookmark/follow
 - [ ] Sitemap.xml + metadata/OpenGraph động
-- [ ] Logging request/error cơ bản
+- [x] Logging request/error cơ bản
 
 ### Việc cần làm ở schema trước khi code Q&A
 - [x] Thêm bảng `questions` (body_markdown, status, accepted_comment_id) vào `supabase/schema.sql`
