@@ -11,6 +11,8 @@ import { CommentSection } from "../components/CommentSection";
 import { TagPill } from "../components/TagPill";
 import { ErrorState } from "../components/EmptyState";
 import { ContentOwnerActions } from "../components/ContentOwnerActions";
+import { ReadingProgressBar } from "../components/ReadingProgressBar";
+import { CodeBlock } from "../components/CodeBlock";
 import { setPageMetadata } from "../lib/seo";
 
 export function PostDetail() {
@@ -34,6 +36,7 @@ export function PostDetail() {
 
   return (
     <article className="flex flex-col gap-6">
+      <ReadingProgressBar />
       <header>
         <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">{item.title}</h1>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
@@ -47,11 +50,21 @@ export function PostDetail() {
 
       <div className="markdown-body text-[15px] dark:text-zinc-200">
         {item.bodyMarkdown && (
-          <p className="mb-4 text-xs text-zinc-400">
-            Thời gian đọc khoảng {Math.max(1, Math.ceil(item.bodyMarkdown.trim().split(/\s+/).length / 200))} phút
-          </p>
+          <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+            <span>⏱️</span>
+            <span>Thời gian đọc: khoảng {Math.max(1, Math.ceil(item.bodyMarkdown.trim().split(/\s+/).length / 200))} phút</span>
+          </div>
         )}
-        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{item.bodyMarkdown ?? ""}</ReactMarkdown>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeHighlight]}
+          components={{
+            code: CodeBlock,
+            pre: ({ children }) => <>{children}</>,
+          }}
+        >
+          {item.bodyMarkdown ?? ""}
+        </ReactMarkdown>
       </div>
 
       <div className="flex items-center gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">

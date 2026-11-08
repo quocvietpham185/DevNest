@@ -5,6 +5,8 @@ import remarkGfm from "remark-gfm";
 import { createPost } from "../lib/content";
 import { useSession } from "../hooks/useSession";
 import { ErrorState } from "../components/EmptyState";
+import { ImageUploadButton } from "../components/ImageUploadButton";
+import { CodeBlock } from "../components/CodeBlock";
 
 export function NewPost() {
   const { session } = useSession();
@@ -36,6 +38,10 @@ export function NewPost() {
     }
   }
 
+  function handleInsertImage(markdownTag: string) {
+    setBody((prev) => prev + markdownTag);
+  }
+
   if (!session) return <ErrorState message="Bạn cần đăng nhập để viết bài." />;
 
   return (
@@ -53,16 +59,35 @@ export function NewPost() {
         className="rounded-full border border-zinc-300 px-4 py-1.5 text-sm outline-none focus:border-accent-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
       />
 
+      <div className="flex items-center justify-between border-b border-zinc-200 pb-2 pt-1 dark:border-zinc-800">
+        <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+          Soạn thảo Markdown song song với xem trước
+        </span>
+        <ImageUploadButton
+          userId={session.user.id}
+          onInserted={handleInsertImage}
+          disabled={submitting}
+        />
+      </div>
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="Viết nội dung bằng Markdown..."
+          placeholder="Viết nội dung bằng Markdown (hoặc dán/tải ảnh lên)..."
           rows={16}
           className="rounded-2xl border border-zinc-300 p-4 font-mono text-sm outline-none focus:border-accent-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
         />
         <div className="markdown-body rounded-2xl border border-zinc-200 p-4 text-sm dark:border-zinc-800 dark:text-zinc-200">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{body || "*Xem trước sẽ hiện ở đây*"}</ReactMarkdown>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              code: CodeBlock,
+              pre: ({ children }) => <>{children}</>,
+            }}
+          >
+            {body || "*Xem trước sẽ hiện ở đây*"}
+          </ReactMarkdown>
         </div>
       </div>
 

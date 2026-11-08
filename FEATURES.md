@@ -17,17 +17,17 @@
 - [x] Đăng ký/đăng nhập bằng **email + password**
 - [x] Đăng nhập bằng **GitHub OAuth** (lựa chọn song song, không bắt buộc)
 - [x] Nếu đăng nhập qua GitHub: lấy avatar + username làm giá trị mặc định (không sync sâu thêm)
-- [ ] Onboarding lần đầu: chọn 3–5 tag quan tâm
+- [x] Onboarding lần đầu: chọn 3–5 tag quan tâm (modal popup gợi ý chọn 3–5 chủ đề & đồng bộ vào `tag_follows`)
 - [x] Trang profile công khai: thông tin cơ bản + danh sách Blog/Project/Q&A/Repo đã đăng
 - [x] Trang chỉnh sửa profile (bio, avatar, website, skills)
 - [x] Đăng xuất
 
 ### Blog (trọng tâm chính)
 - [x] Editor Markdown (soạn + xem trước song song)
-- [ ] Upload ảnh trong bài viết (Supabase Storage)
+- [x] Upload ảnh trong bài viết (Supabase Storage kèm nút tải/chèn ảnh tự động)
 - [x] Gắn tag cho bài viết (tối đa 5)
 - [x] Lưu nháp (draft) / xuất bản (publish)
-- [ ] Trang đọc bài viết: syntax highlighting, SEO meta/OpenGraph động (đã có ước tính thời gian đọc)
+- [x] Trang đọc bài viết: syntax highlighting, copy mã nguồn, thanh tiến trình đọc (progress bar), SEO meta/OpenGraph động, ước tính thời gian đọc
 - [x] Sửa / xoá bài viết đã đăng (có UI chỉnh sửa / xoá tại `/post/:id/edit`)
 
 ### Project Showcase
@@ -70,7 +70,7 @@
 - [x] Report / flag nội dung (nút "Báo cáo" trên trang chi tiết → bảng `reports`)
 - [x] Trang quản trị `/admin` (chỉ admin): tổng quan số liệu, hàng đợi báo cáo (xóa nội dung / đã xử lý / bỏ qua), danh sách & xóa nội dung, quản lý người dùng (cấp/gỡ admin)
 - [x] Ban / khóa tài khoản: admin khóa kèm lý do, người bị khóa chỉ đọc được (chặn đăng bài, sửa bài, bình luận, báo cáo bằng RLS) và thấy banner thông báo; admin không thể bị khóa trực tiếp. Chưa chặn like/bookmark/follow
-- [ ] Sitemap.xml + metadata/OpenGraph động
+- [x] Sitemap.xml + metadata/OpenGraph động
 - [x] Logging request/error cơ bản
 
 ### Việc cần làm ở schema trước khi code Q&A

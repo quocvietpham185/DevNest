@@ -11,6 +11,7 @@ import { ReportButton } from "../components/ReportButton";
 import { CommentSection } from "../components/CommentSection";
 import { ErrorState } from "../components/EmptyState";
 import { ContentOwnerActions } from "../components/ContentOwnerActions";
+import { CodeBlock } from "../components/CodeBlock";
 import { setPageMetadata } from "../lib/seo";
 
 export function RepoDetail() {
@@ -159,7 +160,14 @@ export function RepoDetail() {
             </span>
           </div>
           <div className="markdown-body text-[15px] dark:text-zinc-200">
-            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeHighlight]}
+              components={{
+                code: CodeBlock,
+                pre: ({ children }) => <>{children}</>,
+              }}
+            >
               {readme.content}
             </ReactMarkdown>
           </div>

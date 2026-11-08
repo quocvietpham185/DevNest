@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ErrorState } from "../components/EmptyState";
+import { ImageUploadButton } from "../components/ImageUploadButton";
+import { CodeBlock } from "../components/CodeBlock";
 import { useSession } from "../hooks/useSession";
 import {
   deleteContent,
@@ -134,12 +136,38 @@ export function EditContent() {
       <input value={title} onChange={(event) => setTitle(event.target.value)} required placeholder="Tiêu đề" className="rounded-xl border border-zinc-300 px-4 py-2.5 text-sm outline-none focus:border-accent-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50" />
 
       {isMarkdown ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <textarea value={body} onChange={(event) => setBody(event.target.value)} required rows={16} className="rounded-2xl border border-zinc-300 p-4 font-mono text-sm outline-none focus:border-accent-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50" />
-          <div className="markdown-body rounded-2xl border border-zinc-200 p-4 text-sm dark:border-zinc-800 dark:text-zinc-200">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{body || "*Xem trước sẽ hiện ở đây*"}</ReactMarkdown>
+        <>
+          <div className="flex items-center justify-between border-b border-zinc-200 pb-2 dark:border-zinc-800">
+            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+              Chỉnh sửa nội dung Markdown
+            </span>
+            <ImageUploadButton
+              userId={session.user.id}
+              onInserted={(tag) => setBody((prev) => prev + tag)}
+              disabled={submitting}
+            />
           </div>
-        </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <textarea
+              value={body}
+              onChange={(event) => setBody(event.target.value)}
+              required
+              rows={16}
+              className="rounded-2xl border border-zinc-300 p-4 font-mono text-sm outline-none focus:border-accent-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+            />
+            <div className="markdown-body rounded-2xl border border-zinc-200 p-4 text-sm dark:border-zinc-800 dark:text-zinc-200">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  code: CodeBlock,
+                  pre: ({ children }) => <>{children}</>,
+                }}
+              >
+                {body || "*Xem trước sẽ hiện ở đây*"}
+              </ReactMarkdown>
+            </div>
+          </div>
+        </>
       ) : kind === "project" ? (
         <>
           <textarea value={description} onChange={(event) => setDescription(event.target.value)} required rows={5} placeholder="Mô tả" className="rounded-2xl border border-zinc-300 p-4 text-sm outline-none focus:border-accent-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50" />

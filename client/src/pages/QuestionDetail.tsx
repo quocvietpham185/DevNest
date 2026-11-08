@@ -11,6 +11,7 @@ import { LikeButton } from "../components/LikeButton";
 import { BookmarkButton } from "../components/BookmarkButton";
 import { ReportButton } from "../components/ReportButton";
 import { ContentOwnerActions } from "../components/ContentOwnerActions";
+import { CodeBlock } from "../components/CodeBlock";
 import { setPageMetadata } from "../lib/seo";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -68,7 +69,16 @@ export function QuestionDetail() {
       </header>
 
       <div className="markdown-body text-[15px] dark:text-zinc-200">
-        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{item.bodyMarkdown ?? ""}</ReactMarkdown>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeHighlight]}
+          components={{
+            code: CodeBlock,
+            pre: ({ children }) => <>{children}</>,
+          }}
+        >
+          {item.bodyMarkdown ?? ""}
+        </ReactMarkdown>
       </div>
 
       <div className="flex items-center gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">

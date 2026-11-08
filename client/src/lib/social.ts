@@ -148,3 +148,31 @@ export async function toggleFollowTag(tagName: string, userId: string, following
     if (error) throw error;
   }
 }
+
+export async function fetchUserFollowedTags(userId: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("tag_follows")
+    .select("tags ( name )")
+    .eq("user_id", userId);
+  if (error) throw error;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data ?? []).map((row: any) => row.tags?.name).filter(Boolean);
+}
+
+export async function saveUserFollowedTags(userId: string, tagNames: string[]): Promise<void> {
+  const cleanNames = [...new Set(tagNames.map((t) => t.trim().toLowerCase()).filter(Boolean))];
+  for (const name of cleanNames) {
+    const slug = name.replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const { data: tag, error: tagErr } = await supabase
+      .from("tags")
+      .upsert({ name, slug }, { onConflict: "name" })
+      .select("id")
+      .single();
+    if (tagErr || !tag) continue;
+
+    await supabase
+      .from("tag_follows")
+      .upsert({ tag_id: tag.id, user_id: userId }, { onConflict: "user_id,tag_id" });
+  }
+}
+

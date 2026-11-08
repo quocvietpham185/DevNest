@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useSession } from "../hooks/useSession";
 import { useAccountStatus } from "../hooks/useAccountStatus";
 import { supabase } from "../lib/supabaseClient";
+import { ThemeToggle } from "./ThemeToggle";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `text-sm font-medium ${
@@ -87,9 +88,19 @@ export function Navbar() {
           </div>
         )}
 
+        <ThemeToggle />
+
         {!loading &&
           (session ? (
             <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("devnest:open-onboarding"))}
+                title="Tùy chỉnh chủ đề quan tâm"
+                className="hidden text-xs text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200 sm:inline"
+              >
+                #Chủ đề
+              </button>
               <Link
                 to={`/u/${session.user.user_metadata.user_name ?? session.user.email}`}
                 className="text-sm text-zinc-600 hover:underline dark:text-zinc-400"

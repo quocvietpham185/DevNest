@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { Navbar } from "./components/Navbar";
+import { TagOnboardingModal } from "./components/TagOnboardingModal";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
 import { NewPost } from "./pages/NewPost";
@@ -25,6 +26,7 @@ export function App() {
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
       <Navbar />
+      <TagOnboardingModal />
       {isBanned && (
         <div role="alert" className="bg-red-50 px-6 py-3 text-center text-sm text-red-800 dark:bg-red-950/40 dark:text-red-200">
           Tài khoản của bạn đã bị khóa nên không thể đăng bài, bình luận hay báo cáo.
