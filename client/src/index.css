@@ -39,6 +39,10 @@
   padding: 1em;
   overflow-x: auto;
 }
+:root[data-theme="dark"] .markdown-body pre,
+.dark .markdown-body pre {
+  background: rgb(255 255 255 / 8%);
+}
 .markdown-body pre code { background: none; padding: 0; }
 .markdown-body blockquote {
   border-left: 3px solid var(--color-accent-400);
@@ -46,3 +50,57 @@
   color: inherit;
   opacity: 0.85;
 }
+
+/* Syntax Highlighting for code blocks */
+.hljs-keyword, .hljs-selector-tag, .hljs-subst { color: #d73a49; font-weight: 600; }
+.hljs-string, .hljs-title, .hljs-section, .hljs-attribute, .hljs-literal, .hljs-template-tag, .hljs-template-variable, .hljs-type, .hljs-addition { color: #032f62; }
+.hljs-comment, .hljs-quote, .hljs-deletion, .hljs-meta { color: #6a737d; font-style: italic; }
+.hljs-number, .hljs-regexp, .hljs-link { color: #005cc5; }
+.hljs-built_in, .hljs-symbol { color: #e36209; }
+
+:root[data-theme="dark"] .hljs-keyword,
+:root[data-theme="dark"] .hljs-selector-tag,
+:root[data-theme="dark"] .hljs-subst,
+.dark .hljs-keyword,
+.dark .hljs-selector-tag,
+.dark .hljs-subst { color: #ff7b72; font-weight: 600; }
+
+:root[data-theme="dark"] .hljs-string,
+:root[data-theme="dark"] .hljs-title,
+:root[data-theme="dark"] .hljs-section,
+:root[data-theme="dark"] .hljs-attribute,
+:root[data-theme="dark"] .hljs-literal,
+:root[data-theme="dark"] .hljs-template-tag,
+:root[data-theme="dark"] .hljs-template-variable,
+:root[data-theme="dark"] .hljs-type,
+:root[data-theme="dark"] .hljs-addition,
+.dark .hljs-string,
+.dark .hljs-title,
+.dark .hljs-section,
+.dark .hljs-attribute,
+.dark .hljs-literal,
+.dark .hljs-template-tag,
+.dark .hljs-template-variable,
+.dark .hljs-type,
+.dark .hljs-addition { color: #a5d6ff; }
+
+:root[data-theme="dark"] .hljs-comment,
+:root[data-theme="dark"] .hljs-quote,
+:root[data-theme="dark"] .hljs-deletion,
+:root[data-theme="dark"] .hljs-meta,
+.dark .hljs-comment,
+.dark .hljs-quote,
+.dark .hljs-deletion,
+.dark .hljs-meta { color: #8b949e; font-style: italic; }
+
+:root[data-theme="dark"] .hljs-number,
+:root[data-theme="dark"] .hljs-regexp,
+:root[data-theme="dark"] .hljs-link,
+.dark .hljs-number,
+.dark .hljs-regexp,
+.dark .hljs-link { color: #79c0ff; }
+
+:root[data-theme="dark"] .hljs-built_in,
+:root[data-theme="dark"] .hljs-symbol,
+.dark .hljs-built_in,
+.dark .hljs-symbol { color: #ffa657; }

@@ -27,14 +27,14 @@
 - [ ] Upload ảnh trong bài viết (Supabase Storage)
 - [x] Gắn tag cho bài viết (tối đa 5)
 - [x] Lưu nháp (draft) / xuất bản (publish)
-- [ ] Trang đọc bài viết: syntax highlighting, ước tính thời gian đọc, SEO meta/OpenGraph động
-- [x] Sửa / xoá bài viết đã đăng (qua RLS + Supabase; chưa có UI riêng, sửa lại note bên dưới)
+- [ ] Trang đọc bài viết: syntax highlighting, SEO meta/OpenGraph động (đã có ước tính thời gian đọc)
+- [x] Sửa / xoá bài viết đã đăng (có UI chỉnh sửa / xoá tại `/post/:id/edit`)
 
 ### Project Showcase
 - [x] Form tạo project: tên, mô tả, tech stack (tag), link repo, link demo, ảnh cover
 - [x] Trạng thái project: Đang phát triển / Hoàn thành / Tìm cộng tác viên
 - [x] Trang chi tiết project
-- [ ] UI sửa / xoá project đã đăng (RLS đã cho phép, chưa có form sửa)
+- [x] UI sửa / xoá project đã đăng (form sửa tại `/project/:id/edit` và nút xoá với xác nhận)
 
 ### Q&A / Thảo luận (mới)
 - [x] Đăng câu hỏi: title + nội dung Markdown + tag
@@ -82,12 +82,12 @@
 
 ## Phase 2 — GitHub sâu hơn
 
-- [ ] Auto-sync GitHub profile (followers, company, location, public repos)
-- [ ] Cache + refresh định kỳ metadata repo trong Postgres
-- [ ] Fetch & hiển thị README trong app
-- [ ] GitHub activity, pinned repositories
-- [ ] GitHub webhook
-- [ ] Rate-limit handling nâng cao (queue, backoff)
+- [x] Auto-sync GitHub profile (followers, company, location, public repos — có nút "Đồng bộ GitHub" và API `/api/github/sync-profile`)
+- [x] Cache + refresh định kỳ metadata repo trong Postgres (background worker định kỳ + nút "Làm mới từ GitHub" tại trang RepoDetail)
+- [x] Fetch & hiển thị README trong app (hỗ trợ đọc README với định dạng Markdown và syntax highlighting)
+- [x] GitHub activity, pinned repositories (hiển thị danh sách pinned repos và timeline hoạt động gần đây tại Profile)
+- [x] GitHub webhook (`POST /api/github/webhook` xác thực chữ ký HMAC-SHA256, tự động đồng bộ khi có push, star/watch)
+- [x] Rate-limit handling nâng cao (hàng đợi concurrency-controlled request queue, exponential backoff + jitter khi gặp 403/429, TTL in-memory cache)
 
 ## Phase 3 — AI & Developer Intelligence
 

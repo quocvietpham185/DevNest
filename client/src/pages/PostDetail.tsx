@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
 import { fetchContentById, type FeedItem } from "../lib/content";
 import { LikeButton } from "../components/LikeButton";
 import { BookmarkButton } from "../components/BookmarkButton";
@@ -50,7 +51,7 @@ export function PostDetail() {
             Thời gian đọc khoảng {Math.max(1, Math.ceil(item.bodyMarkdown.trim().split(/\s+/).length / 200))} phút
           </p>
         )}
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.bodyMarkdown ?? ""}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{item.bodyMarkdown ?? ""}</ReactMarkdown>
       </div>
 
       <div className="flex items-center gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">

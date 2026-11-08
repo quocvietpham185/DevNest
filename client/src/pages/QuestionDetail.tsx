@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
 import { fetchContentById, type FeedItem } from "../lib/content";
 import { CommentSection } from "../components/CommentSection";
 import { TagPill } from "../components/TagPill";
@@ -67,7 +68,7 @@ export function QuestionDetail() {
       </header>
 
       <div className="markdown-body text-[15px] dark:text-zinc-200">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.bodyMarkdown ?? ""}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{item.bodyMarkdown ?? ""}</ReactMarkdown>
       </div>
 
       <div className="flex items-center gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">

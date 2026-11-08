@@ -20,6 +20,14 @@ create table public.profiles (
   github_username text,
   avatar_url text,
   bio text,
+  company text,
+  location text,
+  followers_count integer default 0,
+  following_count integer default 0,
+  public_repos_count integer default 0,
+  github_synced_at timestamptz,
+  pinned_repos jsonb default '[]'::jsonb,
+  github_activity jsonb default '[]'::jsonb,
   -- Changed only through public.set_user_role(); column-level grants below
   -- stop users from updating it on their own row.
   role text not null default 'user' check (role in ('user', 'admin')),
@@ -115,7 +123,10 @@ create table public.repos (
   stars integer not null default 0,
   primary_language text,
   note text,
-  metadata_fetched_at timestamptz not null default now()
+  metadata_fetched_at timestamptz not null default now(),
+  readme_markdown text,
+  readme_fetched_at timestamptz,
+  last_synced_at timestamptz default now()
 );
 
 -- ---------------------------------------------------------------------------
